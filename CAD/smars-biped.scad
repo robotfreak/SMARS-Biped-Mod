@@ -1,5 +1,20 @@
 include <roundedCube.scad>
 
+module 9g_servo(){
+	difference(){			
+		union(){
+			cube([23,12.5,22], center=true);
+			translate([0,0,5]) cube([32,12,2], center=true);
+			translate([5.5,0,2.75]) cylinder(r=6, h=25.75, $fn=20, center=true);
+			translate([-.5,0,2.75]) cylinder(r=1, h=25.75, $fn=20, center=true);
+			translate([-1,0,2.75]) cube([5,5.6,24.5], center=true);		
+			translate([5.5,0,3.65]) cylinder(r=2.35, h=29.25, $fn=20, center=true);				
+		}
+		for ( hole = [14,-14] ){
+			translate([hole,0,5]) cylinder(r=2.2, h=4, $fn=20, center=true);
+		}	
+	}
+}
 module servo_mount()
 {
     difference() {
@@ -45,8 +60,20 @@ module feet(height=3)
     translate([30,43.6,height]) conn_diamant();
 }
 
+module biped() 
+{
+    translate([0,0,0]) feet();
+    translate([46,5,3]) rotate([0,0,90]) servo_mount();
+    translate([31,22,9]) rotate([-90,0,-90]) #9g_servo();
+    translate([0,100,0]) feet();
+    translate([46,141,3]) rotate([0,0,-90]) servo_mount_m();
+    translate([31,122,9]) rotate([90,0,90]) #9g_servo();
+
+}
+
+biped();
 //servo_mount();
 //servo_mount_m();
-feet();
+//feet();
 //conn_diamant();
 //translate([60,17,0]) rotate([0,0,-90]) import("servo-case.stl");
