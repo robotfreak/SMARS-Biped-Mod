@@ -34,6 +34,7 @@ module servo_mount()
         translate([2.4,19.6,1.6]) roundedCube([5.5,2.3,12], r=1);
         translate([11.5,34,7.4]) rotate([90,0,0]) cylinder(d=6.5, h=10, $fn=30);
     }
+    translate([18,14.5,7.5]) rotate([90,180,0]) #9g_servo();
 }
 
 module servo_mount_m()
@@ -60,15 +61,35 @@ module feet(height=3)
     translate([30,43.6,height]) conn_diamant();
 }
 
+module servo_arm()
+{
+    import("servo-arm.stl");
+}
+
+module leg()
+{
+    difference() {
+        rotate([90,0,0]) servo_arm();
+        translate([-20,-12,4.5]) cube([50,12,15]);
+    }
+    difference() {
+        translate([-20,-12,22]) rotate([0,90,90]) servo_arm();
+        translate([-39,-12,-1]) cube([15,12,50]);
+    }
+}
+
+
 module biped() 
 {
-    translate([0,0,0]) feet();
-    translate([46,5,3]) rotate([0,0,90]) servo_mount();
-    translate([31,22,9]) rotate([-90,0,-90]) #9g_servo();
-    translate([0,100,0]) feet();
-    translate([46,141,3]) rotate([0,0,-90]) servo_mount_m();
-    translate([31,122,9]) rotate([90,0,90]) #9g_servo();
-
+    translate([0,-50,0]) feet();
+    translate([46,-45,3]) rotate([0,0,90]) servo_mount();
+    translate([25,-45,40]) rotate([90,0,90]) servo_mount();
+    translate([28,-27,35]) leg();
+    
+    translate([0,4,0]) feet();
+    translate([46,45,3]) rotate([0,0,-90]) servo_mount_m();
+    translate([25,45,40]) rotate([-90,0,-90]) servo_mount_m();
+    translate([28,38,35]) leg();
 }
 
 biped();
@@ -76,4 +97,3 @@ biped();
 //servo_mount_m();
 //feet();
 //conn_diamant();
-//translate([60,17,0]) rotate([0,0,-90]) import("servo-case.stl");
