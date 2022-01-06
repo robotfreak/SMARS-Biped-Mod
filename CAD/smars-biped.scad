@@ -2,7 +2,9 @@ include <roundedCube.scad>
 
 part = "all"; // [leg:Leg,feet:Feet,servo:Servo Cover,servo_m:Servo M Cover,all:Comlete Biped]
 
-mode = "exploded"; // [assembled:Fully Assembled view, exploded:Explosion view parts:Parts view]
+mode = "exploded"; // [assembled:Fully Assembled view, exploded:Explosion view,parts:Parts view]
+
+show_servos = "true"; // [true:yes,false:no]
 
 module 9g_servo(){
 	difference(){			
@@ -38,7 +40,14 @@ module servo_mount()
         translate([2.4,19.6,1.6]) roundedCube([5.5,2.3,12], r=1);
         translate([11.5,34,7.4]) rotate([90,0,0]) cylinder(d=6.5, h=10, $fn=30);
     }
-    translate([18,14.5,7.5]) rotate([90,180,0]) #9g_servo();
+    if (show_servos == "true") {
+        if (mode == "exploded") {
+            translate([18,14.5,20.5]) rotate([90,180,0]) #9g_servo();
+        }
+        else {
+            translate([18,14.5,7.5]) rotate([90,180,0]) #9g_servo();
+        }
+    }
 }
 
 module servo_mount_m()
@@ -70,6 +79,12 @@ module servo_arm()
     import("servo-arm.stl");
 }
 
+module matrix_ultrasound() 
+{
+    translate([180,100,0]) rotate([0,0,90]) import("Matrix_Ultra.stl");
+}
+   
+
 module leg()
 {
     difference() {
@@ -88,28 +103,30 @@ module leg()
 
 module assembled() 
 {
-    translate([0,-50,0]) feet();
-    translate([46,-45,3]) rotate([0,0,90]) servo_mount();
-    translate([25,-45,40]) rotate([90,0,90]) servo_mount();
-    translate([28,-27,35]) leg();
-    
     translate([0,4,0]) feet();
-    translate([46,45,3]) rotate([0,0,-90]) servo_mount_m();
-    translate([25,45,40]) rotate([-90,0,-90]) servo_mount_m();
-    translate([28,38,35]) leg();
+    translate([46,9,3]) rotate([0,0,90]) servo_mount();
+    translate([28,27,35]) leg();
+    translate([25,9,40]) rotate([90,0,90]) servo_mount();
+    
+    translate([0,-50,0]) feet();
+    translate([46,-9,3]) rotate([0,0,-90]) servo_mount_m();
+    translate([28,-16,35]) leg();
+    translate([25,-9,40]) rotate([-90,0,-90]) servo_mount_m();
+    
+    translate([-10,0,60])  matrix_ultrasound();
 }
 
 module exploded() 
 {
-    translate([0,-50,0]) feet();
-    translate([46,-45,30]) rotate([0,0,90]) servo_mount();
-    translate([28,-27,80]) leg();
-    translate([65,-45,90]) rotate([90,0,90]) servo_mount();
-    
     translate([0,4,0]) feet();
-    translate([46,45,30]) rotate([0,0,-90]) servo_mount_m();
-    translate([28,38,80]) leg();
-    translate([65,45,90]) rotate([-90,0,-90]) servo_mount_m();
+    translate([46,9,30]) rotate([0,0,90]) servo_mount();
+    translate([28,27,80]) leg();
+    translate([65,9,90]) rotate([90,0,90]) servo_mount();
+    
+    translate([0,-50,0]) feet();
+    translate([46,-9,30]) rotate([0,0,-90]) servo_mount_m();
+    translate([28,-16,80]) leg();
+    translate([65,-9,90]) rotate([-90,0,-90]) servo_mount_m();
 }
 
 //biped();
