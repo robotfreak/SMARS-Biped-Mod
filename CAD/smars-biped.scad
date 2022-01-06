@@ -1,5 +1,9 @@
 include <roundedCube.scad>
 
+part = "all"; // [leg:Leg,feet:Feet,servo:Servo Cover,servo_m:Servo M Cover,all:Comlete Biped]
+
+mode = "exploded"; // [assembled:Fully Assembled view, exploded:Explosion view parts:Parts view]
+
 module 9g_servo(){
 	difference(){			
 		union(){
@@ -70,16 +74,19 @@ module leg()
 {
     difference() {
         rotate([90,0,0]) servo_arm();
-        translate([-20,-12,4.5]) cube([50,12,15]);
+        translate([-24,-12,4.5]) cube([50,12,15]);
+        translate([-9,-12,-2]) cube([15,12,12]);
+        translate([7,-6,-2]) cylinder(d=7.5,h=10, $fn=30);
     }
+
     difference() {
-        translate([-20,-12,22]) rotate([0,90,90]) servo_arm();
-        translate([-39,-12,-1]) cube([15,12,50]);
+        translate([-17,-11.8,21.8]) rotate([0,90,90]) servo_arm();
+        translate([-37,-11.8,-1]) cube([15,12,50]);
     }
 }
 
 
-module biped() 
+module assembled() 
 {
     translate([0,-50,0]) feet();
     translate([46,-45,3]) rotate([0,0,90]) servo_mount();
@@ -92,8 +99,44 @@ module biped()
     translate([28,38,35]) leg();
 }
 
-biped();
+module exploded() 
+{
+    translate([0,-50,0]) feet();
+    translate([46,-45,30]) rotate([0,0,90]) servo_mount();
+    translate([28,-27,80]) leg();
+    translate([65,-45,90]) rotate([90,0,90]) servo_mount();
+    
+    translate([0,4,0]) feet();
+    translate([46,45,30]) rotate([0,0,-90]) servo_mount_m();
+    translate([28,38,80]) leg();
+    translate([65,45,90]) rotate([-90,0,-90]) servo_mount_m();
+}
+
+//biped();
 //servo_mount();
 //servo_mount_m();
 //feet();
 //conn_diamant();
+
+print_part();
+
+module print_part() {
+	if (part == "leg") {
+        leg();
+    } else if (part == "feet") {
+        feet();
+	} else if (part == "servo") {
+		servo_mount();
+	} else if (part == "servo_m") {
+		servo_mount_m();
+	} else if (part == "all") {
+        if (mode == "assembled") {
+		    assembled();
+        }
+        else if (mode == "exploded") {
+            exploded();
+        }
+	} else {
+		assembled();
+	}
+}
