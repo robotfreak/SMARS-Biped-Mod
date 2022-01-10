@@ -1,8 +1,17 @@
-include <roundedCube.scad>
+// SMARS Biped Mod 
+// creator:
+// feet, legs, body design by RobotFreak https://www.thingiverse.com/RobotFreak
+// credits: 
+// SMARS modular robot https://www.thingiverse.com/thing:2662828
+// servo case by tristomietitoredeituit SMARS QUAD MOD https://www.thingiverse.com/thing:2755973
+// matrix ultrasound case by s4snow SMARS meets OTTO DIY https://www.thingiverse.com/thing:2818380
+// 9g servo by TheCase https://www.thingiverse.com/thing:29734
+// roundedCube by sembiance https://www.thingiverse.com/thing:2015341
+include <roundedCube.scad> 
 
-part = "all"; // [leg:Leg,feet:Feet,servo:Servo Cover,servo_m:Servo M Cover,all:Comlete Biped]
+part = "all"; // [leg:Leg,feet:Feet,servo:Servo Cover,servo_m:Servo M Cover,all:All parts]
 
-mode = "exploded"; // [assembled:Fully Assembled view, exploded:Explosion view,parts:Parts view]
+mode = "assembled"; // [assembled:Fully Assembled view, exploded:Explosion view,parts:Parts view]
 
 show_servos = "true"; // [true:yes,false:no]
 
@@ -21,8 +30,9 @@ module 9g_servo(){
 		}	
 	}
 }
-module servo_mount()
+module servo_case()
 {
+  translate([-12.5,-17,-6.3]) {   
     difference() {
         union() {
             roundedCube([36,34,13.6], r=3);
@@ -48,11 +58,12 @@ module servo_mount()
             translate([18,14.5,7.5]) rotate([90,180,0]) #9g_servo();
         }
     }
+  }
 }
 
-module servo_mount_m()
+module servo_case_m()
 {
-    mirror([0,1,0]) servo_mount();
+    mirror([0,1,0]) servo_case();
 }
 
 module conn_diamant() 
@@ -69,9 +80,11 @@ module conn_diamant()
 
 module feet(height=3)
 {
-    roundedCube([60,46,height], r=8);    
-    translate([30,2.4,height]) conn_diamant();
-    translate([30,43.6,height]) conn_diamant();
+    translate([-30,-23,-11]) {
+        roundedCube([60,46,height], r=8);    
+        translate([30,2.4,height]) conn_diamant();
+        translate([30,43.6,height]) conn_diamant();
+    }
 }
 
 module servo_arm()
@@ -87,73 +100,102 @@ module matrix_ultrasound()
 
 module leg()
 {
-    difference() {
-        rotate([90,0,0]) servo_arm();
-        translate([-24,-12,4.5]) cube([50,12,15]);
-        translate([-9,-12,-2]) cube([15,12,12]);
-        translate([7,-6,-2]) cylinder(d=7.5,h=10, $fn=30);
-    }
+    translate([-7.4,6,24.3]) {
+        difference() {
+            rotate([90,0,0]) servo_arm();
+            translate([-24,-12,4.5]) cube([50,12,15]);
+            translate([-9,-12,-2]) cube([15,14,12]);
+        }
 
-    difference() {
-        translate([-17,-11.8,21.8]) rotate([0,90,90]) servo_arm();
-        translate([-37,-11.8,-1]) cube([15,12,50]);
+        difference() {
+            translate([-17,0,21.8]) rotate([0,-90,90]) servo_arm();
+            translate([-37,-12,-1]) cube([15,14,50]);
+        }
     }
 }
 
+module body()
+{
+    translate([-50,-20,-10]) {
+        difference() {
+            translate([0,0,0]) roundedCube([100,40,35], r=2);
+            translate([2,2,2]) roundedCube([96,36,35], r=1.5);
+        }
+        translate([4,0,10]) rotate([0,-90,90]) conn_diamant();
+        translate([45.2,0,10]) rotate([0,-90,90]) conn_diamant();
+        translate([54.8,0,10]) rotate([0,-90,90]) conn_diamant();
+        translate([96,0,10]) rotate([0,-90,90]) conn_diamant();
+    }
+}
 
 module assembled() 
 {
-    translate([0,4,0]) feet();
-    translate([46,9,3]) rotate([0,0,90]) servo_mount();
-    translate([28,27,35]) leg();
-    translate([25,9,40]) rotate([90,0,90]) servo_mount();
+     // right 
+    translate([0,25.5,0]) feet();
+    translate([0,20,0]) rotate([0,180,-90]) servo_case_m();
+    translate([7.4,20,0]) leg();
+    translate([7.4,20,46]) rotate([90,0,90]) servo_case_m();
     
-    translate([0,-50,0]) feet();
-    translate([46,-9,3]) rotate([0,0,-90]) servo_mount_m();
-    translate([28,-16,35]) leg();
-    translate([25,-9,40]) rotate([-90,0,-90]) servo_mount_m();
+    // left
+    translate([0,-25.5,0]) feet();
+    translate([0,-20,0]) rotate([0,180,90]) servo_case();
+    translate([7.4,-20,0]) leg();
+    translate([7.4,-20,46]) rotate([-90,0,-90]) servo_case();
     
-    translate([-10,0,60])  matrix_ultrasound();
+    // body
+    translate([35,0,46]) rotate([0,0,-90]) body();
+    translate([0,0,70]) matrix_ultrasound();
 }
 
 module exploded() 
 {
-    translate([0,4,0]) feet();
-    translate([46,9,30]) rotate([0,0,90]) servo_mount();
-    translate([28,27,80]) leg();
-    translate([65,9,90]) rotate([90,0,90]) servo_mount();
+    // right 
+    translate([0,34,0]) feet();
+    translate([46,39,30]) rotate([0,0,90]) servo_case();
+    translate([28,57,80]) leg();
+    translate([65,21,120]) rotate([90,180,90]) servo_case();
     
+    // left
     translate([0,-50,0]) feet();
-    translate([46,-9,30]) rotate([0,0,-90]) servo_mount_m();
+    translate([46,-9,30]) rotate([0,0,-90]) servo_case_m();
     translate([28,-16,80]) leg();
-    translate([65,-9,90]) rotate([-90,0,-90]) servo_mount_m();
+    translate([65,6,120]) rotate([-90,180,90]) servo_case_m();
+
+    translate([-10,0,90])  matrix_ultrasound();
 }
 
 //biped();
-//servo_mount();
-//servo_mount_m();
+//servo_case();
+//servo_case_m();
 //feet();
 //conn_diamant();
+//9g_servo();
+//body();
 
 print_part();
 
+
 module print_part() {
-	if (part == "leg") {
-        leg();
-    } else if (part == "feet") {
-        feet();
-	} else if (part == "servo") {
-		servo_mount();
-	} else if (part == "servo_m") {
-		servo_mount_m();
-	} else if (part == "all") {
-        if (mode == "assembled") {
+    if (mode == "parts") {
+        if (part == "leg") {
+            leg();
+        } else if (part == "feet") {
+            feet();
+        } else if (part == "servo") {
+            servo_case();
+        } else if (part == "servo_m") {
+            servo_case_m();
+        } else if (part == "all") {
+            translate([0,5.5,0]) feet();
+            translate([7.4,0,0]) leg();
+            rotate([0,0,90]) servo_case();
+            translate([7.4,0,46]) rotate([90,0,0]) servo_case_m();
+        }
+    }
+    else if (mode == "assembled") {
 		    assembled();
         }
-        else if (mode == "exploded") {
+    else if (mode == "exploded") {
             exploded();
         }
-	} else {
-		assembled();
-	}
-}
+} 
