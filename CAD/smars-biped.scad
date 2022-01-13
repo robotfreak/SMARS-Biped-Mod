@@ -13,6 +13,7 @@ part = "all"; // [leg:Leg,feet:Feet,servo:Servo Cover,servo_m:Servo M Cover,all:
 
 mode = "assembled"; // [assembled:Fully Assembled view, exploded:Explosion view,parts:Parts view]
 
+dof = "6DOF"; // [4DOF:4 DoF, 6DOF:6 DoF]
 show_servos = "true"; // [true:yes,false:no]
 
 module 9g_servo(){
@@ -114,12 +115,30 @@ module leg()
     }
 }
 
+module leg_o()
+{
+    translate([-7.4,6,24.3]) {
+        difference() {
+            rotate([90,0,0]) servo_arm();
+            translate([-24,-12,4.5]) cube([50,12,15]);
+        }
+
+        translate([0,-12,4.4]) {
+            difference() {
+                rotate([-90,0,0]) servo_arm();
+                translate([-24,0,-19]) cube([50,12,15]);
+            }
+        }
+
+    }
+}
+
 module body()
 {
     translate([-50,-20,-10]) {
         difference() {
-            translate([0,0,0]) roundedCube([100,40,35], r=2);
-            translate([2,2,2]) roundedCube([96,36,35], r=1.5);
+            translate([0,0,4]) roundedCube([100,30,12], r=2);
+            translate([3,3,4]) roundedCube([94,24,12], r=1.5);
         }
         translate([4,0,10]) rotate([0,-90,90]) conn_diamant();
         translate([45.2,0,10]) rotate([0,-90,90]) conn_diamant();
@@ -131,20 +150,40 @@ module body()
 module assembled() 
 {
      // right 
-    translate([0,25.5,0]) feet();
-    translate([0,20,0]) rotate([0,180,-90]) servo_case_m();
-    translate([7.4,20,0]) leg();
-    translate([7.4,20,46]) rotate([90,0,90]) servo_case_m();
+    if (dof == "4DOF") {
+        translate([0,28,0]) feet();
+        translate([0,22.5,0]) rotate([0,180,-90]) servo_case_m();
+        translate([7.4,22.5,0]) leg();
+        translate([7.4,22.5,46]) rotate([90,0,90]) servo_case_m();
+    }
+    else if (dof == "6DOF") {
+        translate([0,30.5,0]) feet();
+        translate([0,25,0]) rotate([0,180,-90]) servo_case_m();
+        translate([0,31,23]) rotate([90,0,0]) servo_arm();
+        translate([6,25,35]) rotate([0,180,0]) servo_case_m();
+        translate([6,32.5,34]) rotate([0,0,90]) leg_o();
+        translate([7.4,25,86]) rotate([0,180,0]) servo_case_m();
+    }
     
     // left
-    translate([0,-25.5,0]) feet();
-    translate([0,-20,0]) rotate([0,180,90]) servo_case();
-    translate([7.4,-20,0]) leg();
-    translate([7.4,-20,46]) rotate([-90,0,-90]) servo_case();
+    if (dof == "4DOF") {
+        translate([0,-28,0]) feet();
+        translate([0,-22.5,0]) rotate([0,180,90]) servo_case();
+        translate([7.4,-22.5,0]) leg();
+        translate([7.4,-22.5,46]) rotate([-90,0,-90]) servo_case();
+    }
+    else if (dof == "6DOF") {
+        translate([0,-30.5,0]) feet();
+        translate([0,-25,0]) rotate([0,180,90]) servo_case();
+        translate([0,-16.5,23]) rotate([90,0,0]) servo_arm();
+        translate([6,-25,35]) rotate([0,180,0]) servo_case();
+        translate([6,-32.5,34]) rotate([0,0,-90]) leg_o();
+        translate([7.4,-25,86]) rotate([0,180,0]) servo_case();
+    }
     
     // body
-    translate([35,0,46]) rotate([0,0,-90]) body();
-    translate([0,0,70]) matrix_ultrasound();
+    //translate([35,0,46]) rotate([0,0,-90]) body();
+    //translate([0,0,70]) matrix_ultrasound();
 }
 
 module exploded() 
@@ -172,6 +211,7 @@ module exploded()
 //9g_servo();
 //body();
 
+//leg_o();
 print_part();
 
 
