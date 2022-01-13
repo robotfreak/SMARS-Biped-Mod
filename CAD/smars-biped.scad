@@ -67,15 +67,15 @@ module servo_case_m()
     mirror([0,1,0]) servo_case();
 }
 
-module conn_diamant() 
+module conn_diamant(width=4.8) 
 {
     rotate([90,0,0]) 
     difference() { 
         union() {
-            translate([0,4,0]) cube([11.5,8,4.8], center=true);
-            translate([0,8,-2.4]) cylinder(h=4.8, d=11.5, $fn=30);
+            translate([0,4,0]) cube([11.5,8,width], center=true);
+            translate([0,8,-width/2]) cylinder(h=width, d=11.5, $fn=30);
         }
-        translate([0,8,-2.4]) cylinder(d=6.5, h=4.8, $fn=4);
+        translate([0,8,-width/2]) cylinder(d=6.5, h=width, $fn=4);
     }
 }
 
@@ -133,23 +133,57 @@ module leg_o()
     }
 }
 
-module body()
+module body_4dof()
 {
-    translate([-50,-20,-10]) {
+    translate([-52.5,-20,-10]) {
         difference() {
-            translate([0,0,4]) roundedCube([100,30,12], r=2);
-            translate([3,3,4]) roundedCube([94,24,12], r=1.5);
+            translate([0,0,4]) roundedCube([105,30,12], r=2);
+            translate([3,3,4]) roundedCube([99,24,12], r=1.5);
         }
         translate([4,0,10]) rotate([0,-90,90]) conn_diamant();
         translate([45.2,0,10]) rotate([0,-90,90]) conn_diamant();
-        translate([54.8,0,10]) rotate([0,-90,90]) conn_diamant();
-        translate([96,0,10]) rotate([0,-90,90]) conn_diamant();
+        translate([59.8,0,10]) rotate([0,-90,90]) conn_diamant();
+        translate([101,0,10]) rotate([0,-90,90]) conn_diamant();
     }
 }
 
+module body_6dof(width=43, height=12, length=105, wall=3)
+{
+    translate([-length/2,-width/2,-height/2]) {
+        difference() {
+            translate([0,0,4]) roundedCube([length,width,height], r=2);
+            translate([wall,wall,4]) roundedCube([length-wall*2,width-wall*2,height], r=1.5);
+        }
+        translate([26,1.5,4]) rotate([180,0,0]) conn_diamant(width=3);
+        translate([78,1.5,4]) rotate([180,0,0]) conn_diamant(width=3);
+        translate([26,41.5,4]) rotate([180,0,0]) conn_diamant(width=3);
+        translate([78,41.5,4]) rotate([180,0,0]) conn_diamant(width=3);
+    }
+}
+
+module battery_case(width=45, height=22, length=105, wall=2)
+{
+    translate([-length/2,-width/2,-height/2]) {
+        difference() {
+            translate([0,0,0]) roundedCube([length,width,height], r=2);
+            translate([wall,wall,wall]) roundedCube([length-wall*2,width-wall*2,height], r=2);
+        }
+        translate([0,wall*2,height/2]) rotate([0,-90,0]) conn_diamant(width=3);
+        translate([0,width-wall*2,height/2]) rotate([0,-90,0]) conn_diamant(width=3);
+    }
+    // battery pack 
+    difference() {
+        #cube([77,39,15], center=true);
+        #translate([0,0,1]) cube([75,37,14], center=true);
+    }
+    #translate([-34,10,1]) rotate([0,90,0]) cylinder(d=18.6, h=68);
+    #translate([-34,-10,1]) rotate([0,90,0]) cylinder(d=18.6, h=68);
+}
+
+
 module assembled() 
 {
-     // right 
+    // right 
     if (dof == "4DOF") {
         translate([0,28,0]) feet();
         translate([0,22.5,0]) rotate([0,180,-90]) servo_case_m();
@@ -175,15 +209,23 @@ module assembled()
     else if (dof == "6DOF") {
         translate([0,-30.5,0]) feet();
         translate([0,-25,0]) rotate([0,180,90]) servo_case();
-        translate([0,-16.5,23]) rotate([90,0,0]) servo_arm();
+        translate([0,-19,23]) rotate([90,0,0]) servo_arm();
         translate([6,-25,35]) rotate([0,180,0]) servo_case();
         translate([6,-32.5,34]) rotate([0,0,-90]) leg_o();
         translate([7.4,-25,86]) rotate([0,180,0]) servo_case();
     }
     
     // body
-    //translate([35,0,46]) rotate([0,0,-90]) body();
-    //translate([0,0,70]) matrix_ultrasound();
+    if (dof == "4DOF") {
+        translate([35,0,46]) rotate([0,0,-90]) body_4dof();
+        translate([11,0,102]) rotate([0,-90,0]) battery_case();
+        translate([0,0,70]) matrix_ultrasound();
+    }
+    else if (dof == "6DOF") {
+        translate([2,0,98]) rotate([0,0,-90]) body_6dof();
+        translate([12,0,160]) rotate([0,-90,0]) battery_case();
+        translate([-20,0,150]) matrix_ultrasound();
+    }
 }
 
 module exploded() 
@@ -212,6 +254,7 @@ module exploded()
 //body();
 
 //leg_o();
+//battery_case();
 print_part();
 
 
