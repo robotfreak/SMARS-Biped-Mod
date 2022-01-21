@@ -8,13 +8,14 @@
 // 9g servo by TheCase https://www.thingiverse.com/thing:29734
 // roundedCube by sembiance https://www.thingiverse.com/thing:2015341
 include <roundedCube.scad> 
+include <Raspberry_Pi_Zero_back_cover.scad>
 
 part = "all"; // [leg:Leg,feet:Feet,servo:Servo Cover,servo_m:Servo M Cover,all:All parts]
 
 mode = "assembled"; // [assembled:Fully Assembled view, exploded:Explosion view,parts:Parts view]
 
 dof = "6DOF"; // [4DOF:4 DoF, 6DOF:6 DoF]
-show_servos = "true"; // [true:yes,false:no]
+show_non_printable_parts = "true"; // [true:yes,false:no]
 
 module 9g_servo(){
 	difference(){			
@@ -51,7 +52,7 @@ module servo_case()
         translate([2.4,19.6,1.6]) roundedCube([5.5,2.3,12], r=1);
         translate([11.5,34,7.4]) rotate([90,0,0]) cylinder(d=6.5, h=10, $fn=30);
     }
-    if (show_servos == "true") {
+    if (show_non_printable_parts == "true") {
         if (mode == "exploded") {
             translate([18,14.5,20.5]) rotate([90,180,0]) #9g_servo();
         }
@@ -154,13 +155,21 @@ module body_6dof(width=45, height=12, length=105, wall=2)
 {
     translate([-length/2,-width/2,-height/2]) {
         difference() {
-            translate([0,0,4]) roundedCube([length,width,height], r=2);
-            translate([wall,wall,4]) roundedCube([length-wall*2,width-wall*2,height], r=1.5);
+            translate([0,0,0]) roundedCube([length,width,height], r=2);
+            translate([wall,wall,0]) roundedCube([length-wall*2,width-wall*2,height], r=1.5);
         }
-        translate([26,2.5,4]) rotate([180,0,0]) conn_diamant(width=3);
-        translate([78,2.5,4]) rotate([180,0,0]) conn_diamant(width=3);
-        translate([26,42.5,4]) rotate([180,0,0]) conn_diamant(width=3);
-        translate([78,42.5,4]) rotate([180,0,0]) conn_diamant(width=3);
+        translate([26,2.5,0]) rotate([180,0,0]) conn_diamant(width=3);
+        translate([26,2.5,height/2]) cube([11.5,3,height], center=true);
+        translate([78,2.5,0]) rotate([180,0,0]) conn_diamant(width=3);
+        translate([78,2.5,height/2]) cube([11.5,3,height], center=true);
+        translate([26,42.5,0]) rotate([180,0,0]) conn_diamant(width=3);
+        translate([26,42.5,height/2]) cube([11.5,3,height], center=true);
+        translate([78,42.5,0]) rotate([180,0,0]) conn_diamant(width=3);
+        translate([78,42.5,height/2]) cube([11.5,3,height], center=true);
+        translate([length-wall-1,width/2-12, height-8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);
+        translate([length-wall-1,width/2+12, height-8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);
+        translate([wall,width/2-12, height-8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);
+        translate([wall,width/2+12, height-8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);
     }
 }
 
@@ -168,31 +177,48 @@ module battery_case(width=45, height=22, length=105, wall=2)
 {
     translate([-length/2,-width/2,-height/2]) {
         difference() {
-            translate([0,0,0]) roundedCube([length,width,height], r=2);
+            translate([0,0,wall]) roundedCube([length,width,height], r=2);
             translate([wall,wall,0]) roundedCube([length-wall*2,width-wall*2,height], r=2);
         }
         translate([wall+1.5,width/2,0]) cube([3,11.5,6], center=true);
         translate([wall+1.5,width/2,0]) rotate([180,0,90]) conn_diamant(width=3);
+        translate([wall+1.5,width/2,height/2]) cube([3,11.5,height], center=true);
         translate([length-wall-1.5,width/2,0]) rotate([180,0,90]) conn_diamant(width=3);
-        translate([length-wall-1.5,width/2,0]) cube([3,11.5,6], center=true);
-        translate([wall,width/2, height-8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);
-        translate([length-wall-1,width/2, height-8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);               //translate([26,width/2,wall/2]) cube([12,width,wall], center=true);
-        //translate([78,width/2,wall/2]) cube([12,width,wall], center=true);
-        //translate([26,wall+1.5,0]) rotate([180,0,0]) conn_diamant(width=3);
-        //translate([78,wall+1.5,0]) rotate([180,0,0]) conn_diamant(width=3);
-        //translate([26,width-wall-1.5,0]) rotate([180,0,0]) conn_diamant(width=3);
-        //translate([78,width-wall-1.5,0]) rotate([180,0,0]) conn_diamant(width=3);
-
+        translate([length-wall-1.5,width/2,height/2]) cube([3,11.5,height], center=true);
     }
+    if (show_non_printable_parts == "true") {
     // battery pack 
-    difference() {
-        #cube([77,39,15], center=true);
-        #translate([0,0,1]) cube([75,37,14], center=true);
+        difference() {
+            #cube([77,39,15], center=true);
+            #translate([0,0,1]) cube([75,37,14], center=true);
+        }
+        #translate([-34,10,1]) rotate([0,90,0]) cylinder(d=18.6, h=68);
+        #translate([-34,-10,1]) rotate([0,90,0]) cylinder(d=18.6, h=68);
     }
-    #translate([-34,10,1]) rotate([0,90,0]) cylinder(d=18.6, h=68);
-    #translate([-34,-10,1]) rotate([0,90,0]) cylinder(d=18.6, h=68);
 }
 
+module cpu_case(width=45, height=22, length=105, wall=2)
+{
+    translate([-length/2,-width/2,-height/2]) {
+        difference() {
+            translate([0,0,0]) roundedCube([length,width,height], r=2);
+            translate([wall,wall,0]) roundedCube([length-wall*2,width-wall*2,height], r=2);
+        }
+        translate([wall+1.5,width/2+12,0]) rotate([180,0,90]) conn_diamant(width=3);
+        translate([wall+1.5,width/2+12,height/2]) cube([3,11.5,height], center=true);
+        translate([wall+1.5,width/2-12,0]) rotate([180,0,90]) conn_diamant(width=3);
+        translate([wall+1.5,width/2-12,height/2]) cube([3,11.5,height], center=true);
+        translate([wall,width/2, height-8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);
+        translate([length-wall-1.5,width/2-12,0]) rotate([180,0,90]) conn_diamant(width=3);
+        translate([length-wall-1.5,width/2-12,height/2]) cube([3,11.5,height], center=true);
+        translate([length-wall-1.5,width/2+12,0]) rotate([180,0,90]) conn_diamant(width=3);
+        translate([length-wall-1.5,width/2+12,height/2]) cube([3,11.5,height], center=true);
+        translate([length-wall-1,width/2, height-8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);
+        if (show_non_printable_parts == "true") {
+            #translate([length/2,width/2,height/2]) raspi_zero_cover();
+        }
+    }
+}
 
 module assembled() 
 {
@@ -235,8 +261,9 @@ module assembled()
         translate([0,0,90]) matrix_ultrasound();
     }
     else if (dof == "6DOF") {
-        translate([2,0,98]) rotate([0,0,-90]) body_6dof();
-        translate([2,0,120]) rotate([0,0,90]) battery_case();
+        translate([2,0,100]) rotate([0,0,-90]) body_6dof();
+        translate([2,0,118]) rotate([0,0,90]) cpu_case();
+        translate([2,0,139]) rotate([0,0,90]) battery_case();
         translate([-20,0,100]) matrix_ultrasound();
     }
 }
@@ -264,10 +291,11 @@ module exploded()
 //feet();
 //conn_diamant();
 //9g_servo();
-//body_4dof();
+//body_6dof();
 
 //leg_o();
-//battery_case();
+//cpu_case();
+//raspi_zero_cover();
 print_part();
 
 
