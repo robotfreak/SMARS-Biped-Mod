@@ -10,9 +10,11 @@
 include <roundedCube.scad> 
 include <Raspberry_Pi_Zero_back_cover.scad>
 
-part = "all"; // [leg:Leg,feet:Feet,servo:Servo Cover,servo_m:Servo M Cover,all:All parts]
+part = "leg"; // [leg:Leg,feet:Feet,body:Body,servo:Servo Cover,servo_m:Servo M Cover,head:Head Cover,power:Power Cover,cpu:CPU cover]
 
 mode = "assembled"; // [assembled:Fully Assembled view, exploded:Explosion view,parts:Parts view]
+
+ultrasonic = "SRF05"; // [HCSR04:China Clone HC-SR 04, SRF05:Devantech SRF-05]
 
 dof = "6DOF"; // [4DOF:4 DoF, 6DOF:6 DoF]
 show_non_printable_parts = "true"; // [true:yes,false:no]
@@ -94,11 +96,41 @@ module servo_arm()
     import("servo-arm.stl");
 }
 
+
+module ultrasound() 
+{
+    difference() {
+        translate([-13.5,-26,0]) roundedCube([27,52,15.6], r=8);
+        translate([0,0,10.5]) cube([21,44,15], center=true);
+        if (ultrasonic == "HCSR04") {
+            translate([0,13,0]) cylinder(d=17, h=6);
+            translate([0,-13,0]) cylinder(d=17, h=6);
+        }
+        else if (ultrasonic == "SRF05") {
+            translate([0,11.8,0]) cylinder(d=17, h=6);
+            translate([0,-11.8,0]) cylinder(d=17, h=6);
+        }
+        translate([0,24,8]) cube([10.5,5.5,16], center=true);
+        translate([0,-24,8]) cube([10.5,5.5,16], center=true);
+    }
+    translate([0,0,0])  cylinder(d=4.8, h=12);
+}
+  
+module matrix_8x8() 
+{
+    translate([-19,-23,0]) rotate([90,0,90]) difference() {
+        roundedCube([36, 46, 15.6], r=2);
+        translate([1.75,1.75,3]) roundedCube([32.5, 42.5, 15.6], r=2);
+        translate([1.75,6.75,0.4]) cube([32.5, 32.5, 15.6]);
+    }
+}
+
 module matrix_ultrasound() 
 {
-    translate([180,100,0]) rotate([0,0,90]) import("Matrix_Ultra.stl");
+    translate([-20,0,58]) rotate([0,90,0]) ultrasound();
+    translate([-1,5,0]) matrix_8x8();
 }
-   
+  
 
 module leg()
 {
@@ -302,18 +334,31 @@ print_part();
 module print_part() {
     if (mode == "parts") {
         if (part == "leg") {
-            leg();
+            if (dof == "4DOF") {
+                leg();
+            } else if (dof == "6DOF") {
+                leg_o();
+            }
+        } else if (part == "leg_o") {
+            leg_o();
         } else if (part == "feet") {
             feet();
+        } else if (part == "body") {
+            if (dof == "4DOF") {
+                body_4dof();
+            } else if (dof == "6DOF") {
+                body_6dof();
+            }
         } else if (part == "servo") {
             servo_case();
         } else if (part == "servo_m") {
             servo_case_m();
-        } else if (part == "all") {
-            translate([0,5.5,0]) feet();
-            translate([7.4,0,0]) leg();
-            rotate([0,0,90]) servo_case();
-            translate([7.4,0,46]) rotate([90,0,0]) servo_case_m();
+        } else if (part == "head") {
+            matrix_ultrasound();
+        } else if (part == "power") {
+            battery_case();
+        } else if (part == "cpu") {
+            cpu_case();
         }
     }
     else if (mode == "assembled") {
