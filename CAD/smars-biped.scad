@@ -16,6 +16,8 @@ mode = "assembled"; // [assembled:Fully Assembled view, exploded:Explosion view,
 
 ultrasonic = "SRF05"; // [HCSR04:China Clone HC-SR 04, SRF05:Devantech SRF-05]
 
+matrix = "m8x8"; // [m8x8:8x8 Matrix,m16x8:16x8 Matrix,none:No Matrix]
+
 dof = "6DOF"; // [4DOF:4 DoF, 6DOF:6 DoF]
 show_non_printable_parts = "true"; // [true:yes,false:no]
 
@@ -97,19 +99,26 @@ module servo_arm()
 }
 
 
-module ultrasound() 
+module ultrasound_hcsr04() 
+{
+    difference() {
+        translate([-13.5,-27,0]) roundedCube([27,54,15.6], r=8);
+        translate([0,0,10.5]) cube([21,46,15], center=true);
+        translate([0,13,0]) cylinder(d=17, h=6);
+        translate([0,-13,0]) cylinder(d=17, h=6);
+        translate([0,25.5,8]) cube([10.5,5.5,16], center=true);
+        translate([0,-25.5,8]) cube([10.5,5.5,16], center=true);
+    }
+    translate([0,0,0])  cylinder(d=4.8, h=12);
+}
+
+module ultrasound_srf05() 
 {
     difference() {
         translate([-13.5,-26,0]) roundedCube([27,52,15.6], r=8);
         translate([0,0,10.5]) cube([21,44,15], center=true);
-        if (ultrasonic == "HCSR04") {
-            translate([0,13,0]) cylinder(d=17, h=6);
-            translate([0,-13,0]) cylinder(d=17, h=6);
-        }
-        else if (ultrasonic == "SRF05") {
-            translate([0,11.8,0]) cylinder(d=17, h=6);
-            translate([0,-11.8,0]) cylinder(d=17, h=6);
-        }
+        translate([0,11.8,0]) cylinder(d=17, h=6);
+        translate([0,-11.8,0]) cylinder(d=17, h=6);
         translate([0,24,8]) cube([10.5,5.5,16], center=true);
         translate([0,-24,8]) cube([10.5,5.5,16], center=true);
     }
@@ -118,17 +127,34 @@ module ultrasound()
   
 module matrix_8x8() 
 {
-    translate([-19,-23,0]) rotate([90,0,90]) difference() {
-        roundedCube([36, 46, 15.6], r=2);
-        translate([1.75,1.75,3]) roundedCube([32.5, 42.5, 15.6], r=2);
-        translate([1.75,6.75,0.4]) cube([32.5, 32.5, 15.6]);
+    translate([-23,-19,0]) rotate([90,0,90]) difference() {
+        roundedCube([46, 36, 15.6], r=2);
+        translate([1.75,1.75,3]) roundedCube([42.5, 32.5, 15.6], r=2);
+        translate([6.75,1.75,0.4]) cube([32.5, 32.5, 15.6]);
+    }
+}
+
+module matrix_16x8() 
+{
+    translate([-38.5,-19,0])  rotate([90,0,90]) difference() {
+        roundedCube([77, 36, 15.6], r=2);
+        translate([1.75,1.75,3]) roundedCube([73.5, 32.5, 15.6], r=2);
+        translate([6.25,1.75,0.4]) cube([64.5, 32.5, 15.6]);
     }
 }
 
 module matrix_ultrasound() 
 {
-    translate([-20,0,58]) rotate([0,90,0]) ultrasound();
-    translate([-1,5,0]) matrix_8x8();
+    if (ultrasonic == "HCSR04") {
+        translate([-17.5,0,48]) rotate([0,90,0]) ultrasound_hcsr04();
+    } else if (ultrasonic == "SRF05") {
+        translate([-17.5,0,48]) rotate([0,90,0]) ultrasound_srf05();
+    }
+    if (matrix == "m8x8") {
+        translate([5.5,-4,0]) matrix_8x8();
+    } else if (matrix == "m16x8") {
+        translate([21,-19,0]) matrix_16x8();
+    }
 }
   
 
