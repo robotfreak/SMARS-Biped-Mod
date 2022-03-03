@@ -468,24 +468,23 @@ module exploded()
 //body_6dof(height=18);
 //battery_case();
 //leg_o();
-cpu_case();
+//cpu_case();
 //raspi_zero_cover();
 //ultrasound_clamp();
 //translate([50,0,0]) rotate([0,0,90]) battery_case(height=12);
 
-//print_part();
+print_part();
 
 
 module print_part() {
     if (mode == "parts") {
         if (part == "leg") {
             if (dof == "4DOF") {
-                leg();
+                leg_4dof();
             } else if (dof == "6DOF") {
-                leg_o();
+                leg_upper_6dof();
+                translate([50,0,0]) leg_lower_6dof();
             }
-        } else if (part == "leg_o") {
-            leg_o();
         } else if (part == "feet") {
             feet();
         } else if (part == "body") {
