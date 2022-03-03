@@ -225,6 +225,12 @@ module leg_o()
     }
 }
 */
+module leg_4dof() {
+    translate([-9,0,14]) rotate([90,0,0]) servo_arm2();
+    translate([-17,0,46]) rotate([0,-90,90]) servo_arm2();
+    
+}
+
 module leg_upper_6dof() {
     translate([0,-12,0]) servo_arm2();
     translate([0,12,0]) mirror([0,1,0]) servo_arm2();
@@ -346,9 +352,9 @@ module cpu_case(width=45, height=22, length=105, wall=2)
         difference() {
             translate([0,0,0]) roundedCube([length,width,height], r=2);
             translate([wall,wall,0]) roundedCube([length-wall*2,width-wall*2,height], r=2);
-            translate([length/2+32.5-12.4,0,height-7]) cube([12,4,4], center=true);
-            translate([length/2+32.5-41.4,0,height-7]) cube([10,4,4], center=true);
-            translate([length/2+32.5-54,0,height-7]) cube([10,4,4], center=true);
+            translate([length/2+32.5-12.4,0,height-7]) cube([14,4,6], center=true); //hdmi
+            translate([length/2+32.5-41.4,0,height-7]) cube([10,4,4], center=true); //usb
+            translate([length/2+32.5-54,0,height-7]) cube([10,4,4], center=true);   //usb
         }
         translate([wall+1.5,width/2+12,0]) rotate([180,0,90]) conn_diamant(width=3);
         translate([wall+1.5,width/2+12,height/2]) cube([3,11.5,height], center=true);
@@ -420,8 +426,9 @@ module assembled()
     
     // body
     if (dof == "4DOF") {
-        translate([37,0,42]) rotate([0,0,-90]) body_4dof();
-        translate([48,0,106]) rotate([0,0,90]) battery_case();
+        translate([37,0,42]) rotate([0,0,-90]) body_4dof(height=18);
+        translate([37,0,68]) rotate([0,0,90]) cpu_case();
+        translate([37,0,89]) rotate([0,0,90]) battery_case();
         translate([0,0,90]) matrix_ultrasound();
     }
     else if (dof == "6DOF") {
@@ -461,12 +468,12 @@ module exploded()
 //body_6dof(height=18);
 //battery_case();
 //leg_o();
-//cpu_case();
+cpu_case();
 //raspi_zero_cover();
 //ultrasound_clamp();
 //translate([50,0,0]) rotate([0,0,90]) battery_case(height=12);
 
-print_part();
+//print_part();
 
 
 module print_part() {
