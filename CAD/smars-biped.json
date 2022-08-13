@@ -1,0 +1,33 @@
+{
+    "parameterSets": {
+        "6dof-dwayne-head": {
+            "$fn": "30",
+            "dof": "6DOF",
+            "headtype": "stl",
+            "matrix": "m8x8",
+            "mode": "assembled",
+            "part": "head",
+            "show_non_printable_parts": "false",
+            "stlhead_file": "dwayne_head_v2.stl",
+            "stlhead_offset": "[0, 0, 0]",
+            "stlhead_rotate": "[0, 0, 0]",
+            "stlhead_scale": "0.2",
+            "ultrasonic": "HCSR04"
+        },
+        "4dof-ultrasonichead": {
+            "$fn": "30",
+            "dof": "4DOF",
+            "headtype": "ultrasonic",
+            "matrix": "m8x8",
+            "mode": "assembled",
+            "part": "head",
+            "show_non_printable_parts": "false",
+            "stlhead_file": "dwayne_head_v2.stl",
+            "stlhead_offset": "[0, 0, 0]",
+            "stlhead_rotate": "[0, 0, 0]",
+            "stlhead_scale": "0.2",
+            "ultrasonic": "HCSR04"
+        }
+    },
+    "fileFormatVersion": "1"
+}
