@@ -15,12 +15,15 @@ use <dovetail.scad>
 /* [global] */
 part = "head"; // [leg:Leg,feet:Feet,body:Body,servo:Servo Cover,servo_m:Servo M Cover,head:Head Cover,power:Power Cover,cpu:CPU cover]
 
-mode = "parts"; // [assembled:Fully Assembled view, exploded:Explosion view,parts:Parts view]
+mode = "units"; // [assembled:Fully Assembled view, exploded:Explosion view,parts:Parts view, units:Units view]
 dof = "6DOF"; // [4DOF:4 DoF, 6DOF:6 DoF]
 show_non_printable_parts = "false"; // [true:yes,false:no]
 
 /* [head] */
 headtype = "ultrasonic"; // [ultrasonic:Ultrasonic, stl: STL File]
+head_offset = [0,0,0];
+head_rotate = [0,0,0];
+
 ultrasonic = "HCSR04"; // [HCSR04:China Clone HC-SR 04, SRF05:Devantech SRF-05]
 matrix = "m8x8"; // [m8x8:8x8 Matrix,m16x8:16x8 Matrix,none:No Matrix]
 stlhead_file = "dwayne_head_v2.stl";
@@ -29,10 +32,24 @@ stlhead_offset = [0,0,0];
 stlhead_rotate = [0,0,0];
 
 /* [body] */
+body_u_offset = [0,0,0];
+body_u_rotate = [0,0,0];
+body_m_offset = [0,0,0];
+body_m_rotate = [0,0,0];
+body_l_offset = [0,0,0];
+body_l_rotate = [0,0,0];
 
 /* [arms] */
+arm_l_offset = [0,0,0];
+arm_l_rotate = [0,0,0];
+arm_r_offset = [0,0,0];
+arm_r_rotate = [0,0,0];
 
 /* [legs] */
+leg_l_offset = [0,0,0];
+leg_l_rotate = [0,0,0];
+leg_r_offset = [0,0,0];
+leg_r_rotate = [0,0,0];
 
 module 9g_servo(){
 	difference(){			
@@ -457,6 +474,27 @@ module right_leg_6dof() {
 
 }
 
+module body_case_4dof() {
+  translate([0,0,0]) rotate([90,0,0]) body_case();
+  translate([0,0,46]) rotate([90,0,0]) body_case();
+}
+
+module body_case(width=44, height=42, length=105, wall=2) {
+    translate([-length/2, -width/2, -height/2]) 
+        difference() {
+            translate([0,0,0]) roundedCube([length,width, height], r=2);
+            translate([wall,wall,wall]) roundedCube([length-wall*2,width-wall*2,height], r=2);
+        }
+        translate([0,width/2+1.5,-(height/2-5)]) rotate([0,90,90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
+        translate([-10,width/2+1.5,-(height/2-5)]) rotate([0,90,90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
+        translate([10,width/2+1.5,-(height/2-5)]) rotate([0,90,90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
+        translate([0,-(width/2+1.5),-(height/2-5)]) rotate([0,90,-90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+        translate([-10,-(width/2+1.5),-(height/2-5)]) rotate([0,90,-90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+        translate([10,-(width/2+1.5),-(height/2-5)]) rotate([0,90,-90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+        translate([20,-(width/2+1.5),-(height/2-5)]) cube([10,3,10], center=true);
+        translate([-20,-(width/2+1.5),-(height/2-5)]) cube([10,3,10], center=true);
+} 
+
 module assembled() 
 {
     // right leg
@@ -477,9 +515,13 @@ module assembled()
     
     // body
     if (dof == "4DOF") {
-        translate([37,0,42]) rotate([0,0,-90]) body_4dof(height=18);
-        translate([37,0,68]) rotate([0,0,90]) cpu_case();
-        translate([37,0,89]) rotate([0,0,90]) battery_case();
+       translate(body_l_offset) rotate(body_l_rotate) body_case(44,42,75,3);
+       translate(body_m_offset) rotate(body_m_rotate) body_case(44,42,75,3);
+       translate(body_u_offset) rotate(body_u_rotate) body_case(44,42,75,3);
+        
+//        translate([37,0,42]) rotate([0,0,-90]) body_4dof(height=18);
+//        translate([37,0,68]) rotate([0,0,90]) cpu_case();
+//        translate([37,0,89]) rotate([0,0,90]) battery_case();
     }
     else if (dof == "6DOF") {
         translate([2,0,100]) rotate([0,0,-90]) body_6dof();
@@ -489,7 +531,7 @@ module assembled()
 
     // head
     if (dof == "4DOF") {
-        translate([0,0,90]) head(); 
+        translate(head_offset) head(); 
     }
     else if (dof == "6DOF") {
         translate([0,0,160]) head(); 
@@ -534,7 +576,7 @@ print_part();
 
 
 module print_part() {
-    if (mode == "parts") {
+    if (mode == "units") {
         if (part == "leg") {
             if (dof == "4DOF") {
                 leg_4dof();
@@ -546,7 +588,7 @@ module print_part() {
             feet();
         } else if (part == "body") {
             if (dof == "4DOF") {
-                body_4dof();
+                body_case_4dof();
             } else if (dof == "6DOF") {
                 body_6dof();
             }
