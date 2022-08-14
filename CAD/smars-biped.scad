@@ -13,9 +13,9 @@ include <Raspberry_Pi_Zero_back_cover.scad>
 use <dovetail.scad>
 
 /* [global] */
-part = "head"; // [leg:Leg,feet:Feet,body:Body,servo:Servo Cover,servo_m:Servo M Cover,head:Head Cover,power:Power Cover,cpu:CPU cover]
-
 mode = "units"; // [assembled:Fully Assembled view, exploded:Explosion view,parts:Parts view, units:Units view]
+part = "head"; // [leg:Leg,feet:Feet,body:Body,servo:Servo Cover,servo_m:Servo M Cover,head:Head Cover,power:Power Cover,cpu:CPU cover]
+unit = "leg_l"; // [leg_l:Leg Left,leg_r:Leg Right,body:Body,head:Head] 
 dof = "6DOF"; // [4DOF:4 DoF, 6DOF:6 DoF]
 show_non_printable_parts = "false"; // [true:yes,false:no]
 
@@ -182,6 +182,20 @@ module ultrasound_clamp()
     }
     translate([2,23.25,-5]) rotate([0,0,60]) cylinder(d=4,h=10,$fn=3);
     translate([2,-23.25,-5]) rotate([0,0,-60]) cylinder(d=4,h=10,$fn=3);
+    translate([14,10,0]) rotate([0,0,0]) dovetailPlate(female(), size= [10,10,3], plate=8, center=true);
+    translate([14,-10,0]) rotate([0,0,0]) dovetailPlate(female(), size= [10,10,3], plate=8, center=true);
+
+}
+
+module ultrasound_clamp_vert()
+{
+    difference() {
+        translate([-9.25,-27,-5]) roundedCube([18.5,54,10], r=1.5);
+        translate([-0.5,0,0]) cube([15.5,46.5,10], center=true);
+        translate([-8,0,0]) cube([3,44.5,10], center=true);
+    }
+    translate([2,23.25,-5]) rotate([0,0,60]) cylinder(d=4,h=10,$fn=3);
+    translate([2,-23.25,-5]) rotate([0,0,-60]) cylinder(d=4,h=10,$fn=3);
     translate([14,10,0]) rotate([0,90,0]) dovetailPlate(female(), size= [10,10,3], plate=8, center=true);
     translate([14,-10,0]) rotate([0,90,0]) dovetailPlate(female(), size= [10,10,3], plate=8, center=true);
 
@@ -255,8 +269,17 @@ module leg_o()
 }
 */
 module leg_4dof() {
-    translate([-9,0,14]) rotate([90,0,0]) servo_arm2();
-    translate([-17,0,46]) rotate([0,-90,90]) servo_arm2();
+        translate([-9,0,14]) rotate([90,0,0]) 
+        difference() {
+            servo_arm2();
+            translate([-14,14,0]) rotate([90,0,0]) cylinder(d=7.5, h=6);
+            translate([0,12,0]) rotate([0,0,90])hull() {    
+                translate([0,0,0]) rotate([0,90,0]) cylinder(d=5, h=2);
+                translate([0,14,0]) rotate([0,90,0]) cylinder(d=7, h=2);
+            }
+        } 
+
+//    translate([-17,0,46]) rotate([0,-90,90]) servo_arm2();
     
 }
 
@@ -421,12 +444,17 @@ module cpu_case(width=45, height=22, length=105, wall=2)
 
 module ultrasonic_head() {
     matrix_ultrasound();
-    ultrasound_clamp();
+    translate([-8,0,48]) rotate([180,0,0]) ultrasound_clamp();
 }
 
 module stl_head() {
- translate(stlhead_offset) rotate(stlhead_rotate) scale([stlhead_scale, stlhead_scale, stlhead_scale]) import(stlhead_file, convexity=3);
+    difference() {
+        translate(stlhead_offset) rotate(stlhead_rotate) scale([stlhead_scale, stlhead_scale, stlhead_scale]) import(stlhead_file, convexity=3);
+        translate([0,0,-3]) cube([40,40,6], center=true);
+    }
+    translate([-1,0,-0.5]) cylinder(d=22, h=4, $fn=50);
  translate([0,0,2]) rotate([180,0,0]) dovetailPlate(female(), size= [10,10,3], plate=8, center=true);
+    //}
 
 }
 
@@ -443,7 +471,7 @@ module left_leg_4dof() {
         translate([0,-28,0]) feet();
         translate([0,-22.5,0]) rotate([0,180,90]) servo_case();
         translate([7.4,-22.5,0]) leg_4dof();
-        translate([7.4,-22.5,46]) rotate([-90,0,-90]) servo_case();
+        //translate([7.4,-22.5,46]) rotate([-90,0,-90]) servo_case();
 }
 
 module left_leg_6dof() {
@@ -460,7 +488,7 @@ module right_leg_4dof() {
         translate([0,28,0]) feet();
         translate([0,22.5,0]) rotate([0,180,-90]) servo_case_m();
         translate([7.4,22.5,0]) leg_4dof();
-        translate([7.4,22.5,46]) rotate([90,0,90]) servo_case_m();
+        //translate([7.4,22.5,46]) rotate([90,0,90]) servo_case_m();
 
 }
 
@@ -517,7 +545,7 @@ module assembled()
     if (dof == "4DOF") {
        translate(body_l_offset) rotate(body_l_rotate) body_case(44,42,75,3);
        translate(body_m_offset) rotate(body_m_rotate) body_case(44,42,75,3);
-       translate(body_u_offset) rotate(body_u_rotate) body_case(44,42,75,3);
+       //translate(body_u_offset) rotate(body_u_rotate) body_case(44,42,75,3);
         
 //        translate([37,0,42]) rotate([0,0,-90]) body_4dof(height=18);
 //        translate([37,0,68]) rotate([0,0,90]) cpu_case();
@@ -555,6 +583,30 @@ module exploded()
     translate([-10,0,90])  matrix_ultrasound();
 }
 
+module units() 
+{
+        if (unit == "leg_l") {
+            if (dof == "4DOF") {
+                left_leg_4dof();
+            } else if (dof == "6DOF") {
+                left_leg_6dof();
+            }
+        } else if (unit == "leg_r") {
+            if (dof == "4DOF") {
+                right_leg_4dof();
+            } else if (dof == "6DOF") {
+                right_leg_6dof();
+            }
+        } else if (unit == "body") {
+            if (dof == "4DOF") {
+                body_case_4dof();
+            } else if (dof == "6DOF") {
+                body_6dof();
+            }
+        } else if (unit == "head") {
+            head();
+        }
+    }    
 //biped();
 //servo_case();
 //servo_case_m();
@@ -572,11 +624,14 @@ module exploded()
 //ultrasound_clamp();
 //translate([50,0,0]) rotate([0,0,90]) battery_case(height=12);
 
-print_part();
+print();
 
 
-module print_part() {
+module print() {
     if (mode == "units") {
+        units();
+    }
+    if (mode == "parts") {
         if (part == "leg") {
             if (dof == "4DOF") {
                 leg_4dof();
