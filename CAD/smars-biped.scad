@@ -272,10 +272,10 @@ module leg_4dof() {
         translate([-9,0,14]) rotate([90,0,0]) 
         difference() {
             servo_arm2();
-            translate([-14,14,0]) rotate([90,0,0]) cylinder(d=7.5, h=6);
-            translate([0,12,0]) rotate([0,0,90])hull() {    
-                translate([0,0,0]) rotate([0,90,0]) cylinder(d=5, h=2);
-                translate([0,14,0]) rotate([0,90,0]) cylinder(d=7, h=2);
+            translate([3,14,0]) rotate([90,0,0]) cylinder(d=7.5, h=6);
+            translate([3,10,0]) rotate([0,0,90])hull() {    
+                translate([0,14,0]) rotate([0,90,0]) cylinder(d=5, h=2);
+                translate([0,0,0]) rotate([0,90,0]) cylinder(d=7, h=2);
             }
         } 
 
@@ -507,20 +507,37 @@ module body_case_4dof() {
   translate([0,0,46]) rotate([90,0,0]) body_case();
 }
 
+module servo_mount() {
+    cube([8,24,13], center=true);
+    translate([0,14,0]) rotate([0,90,0]) cylinder(h=8, d=3, center=true);
+    translate([0,-14,0]) rotate([0,90,0]) cylinder(h=8, d=3, center=true);
+}
+
 module body_case(width=44, height=42, length=105, wall=2) {
-    translate([-length/2, -width/2, -height/2]) 
-        difference() {
-            translate([0,0,0]) roundedCube([length,width, height], r=2);
-            translate([wall,wall,wall]) roundedCube([length-wall*2,width-wall*2,height], r=2);
+    difference() {
+        union() {
+            translate([-length/2, -width/2, -height/2]) 
+            difference() {
+                translate([0,0,0]) roundedCube([length,width, height], r=2);
+                translate([wall,wall,wall]) roundedCube([length-wall*2,width-wall*2,height], r=2);
+            }   
+            translate([0,width/2+1.5,-(height/2-5)]) rotate([0,90,90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
+            translate([-10,width/2+1.5,-(height/2-5)]) rotate([0,90,90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
+            translate([10,width/2+1.5,-(height/2-5)]) rotate([0,90,90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
+            translate([0,-(width/2+1.5),-(height/2-5)]) rotate([0,90,-90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+            translate([-10,-(width/2+1.5),-(height/2-5)]) rotate([0,90,-90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+            translate([10,-(width/2+1.5),-(height/2-5)]) rotate([0,90,-90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
         }
-        translate([0,width/2+1.5,-(height/2-5)]) rotate([0,90,90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
-        translate([-10,width/2+1.5,-(height/2-5)]) rotate([0,90,90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
-        translate([10,width/2+1.5,-(height/2-5)]) rotate([0,90,90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
-        translate([0,-(width/2+1.5),-(height/2-5)]) rotate([0,90,-90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
-        translate([-10,-(width/2+1.5),-(height/2-5)]) rotate([0,90,-90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
-        translate([10,-(width/2+1.5),-(height/2-5)]) rotate([0,90,-90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
-        translate([20,-(width/2+1.5),-(height/2-5)]) cube([10,3,10], center=true);
-        translate([-20,-(width/2+1.5),-(height/2-5)]) cube([10,3,10], center=true);
+        translate([length/2,-2,-(height/2-wall-7)]) servo_mount();  
+        translate([-length/2,-2,-(height/2-wall-7)]) servo_mount();  
+        translate([23,-width/2,-2]) rotate([90,0,90]) servo_mount();  
+        translate([-23,-width/2,-2]) rotate([90,0,90]) servo_mount();  
+        translate([23,width/2,-2]) rotate([90,0,90]) servo_mount();  
+        translate([-23,width/2,-2]) rotate([90,0,90]) servo_mount();  
+        
+    }
+        //translate([20,-(width/2+1.5),-(height/2-5)]) cube([10,3,10], center=true);
+        //translate([-20,-(width/2+1.5),-(height/2-5)]) cube([10,3,10], center=true);
 } 
 
 module assembled() 
@@ -543,8 +560,8 @@ module assembled()
     
     // body
     if (dof == "4DOF") {
-       translate(body_l_offset) rotate(body_l_rotate) body_case(44,42,75,3);
-       translate(body_m_offset) rotate(body_m_rotate) body_case(44,42,75,3);
+       translate(body_l_offset) rotate(body_l_rotate) body_case(44,42,75,1.5);
+       translate(body_m_offset) rotate(body_m_rotate) body_case(44,42,75,1.5);
        //translate(body_u_offset) rotate(body_u_rotate) body_case(44,42,75,3);
         
 //        translate([37,0,42]) rotate([0,0,-90]) body_4dof(height=18);
@@ -611,7 +628,7 @@ module units()
 //servo_case();
 //servo_case_m();
 //translate([0,0,10]) servo_arm();
-//leg_4dof(); 
+!leg_4dof(); 
 //servo_arm2();
 //feet();
 //conn_diamant();
@@ -623,7 +640,8 @@ module units()
 //raspi_zero_cover();
 //ultrasound_clamp();
 //translate([50,0,0]) rotate([0,0,90]) battery_case(height=12);
-
+//body_case(44,42,75,1.5);
+    
 print();
 
 
