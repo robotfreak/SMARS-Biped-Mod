@@ -10,6 +10,7 @@
 // dovetail by jag https://www.thingiverse.com/thing:10269
 include <roundedCube.scad> 
 include <Raspberry_Pi_Zero_back_cover.scad>
+use <PiZero.scad>
 use <dovetail.scad>
 
 /* [global] */
@@ -32,6 +33,8 @@ stlhead_offset = [0,0,0];
 stlhead_rotate = [0,0,0];
 
 /* [body] */
+body_offset = [0,0,60];
+body_rotate = [0,0,90];
 body_u_offset = [0,0,0];
 body_u_rotate = [0,0,0];
 body_m_offset = [0,0,0];
@@ -66,6 +69,7 @@ module 9g_servo(){
 		}	
 	}
 }
+
 module servo_case()
 {
   translate([-12.5,-17,-6.3]) {   
@@ -311,7 +315,7 @@ module body_4dof(width=45, height=12, length=105, wall=2)
         translate([101,0,10]) rotate([0,-90,90]) conn_diamant();
     }
 }
-
+/*
 module body_6dof(width=45, height=18, length=105, wall=2)
 {
     translate([-length/2,-width/2,-height/2]) {
@@ -441,6 +445,17 @@ module cpu_case(width=45, height=22, length=105, wall=2)
         }
     }
 }
+*/
+
+module battery() {
+    hull() {
+        cylinder(h=50,d=14, center=true);
+        translate([14,0,0]) cylinder(h=50,d=14, center=true);
+        translate([-14,0,0]) cylinder(h=50,d=14, center=true);
+        translate([7,12,0]) cylinder(h=50,d=14, center=true);
+        translate([-7,12,0]) cylinder(h=50,d=14, center=true);
+    }
+}
 
 module ultrasonic_head() {
     matrix_ultrasound();
@@ -504,7 +519,18 @@ module right_leg_6dof() {
 
 module body_case_4dof() {
   translate([0,0,0]) rotate([90,0,0]) body_case();
+  if (show_non_printable_parts == "true") {
+     translate([23,2,-18]) rotate([180,0,-90]) #9g_servo();
+     translate([-23,2,-18]) rotate([180,0,-90]) #9g_servo();
+     translate([0,-8,5]) rotate([-90,0,0]) #battery(); 
+  }
+
   translate([0,0,46]) rotate([90,0,0]) body_case();
+  if (show_non_printable_parts == "true") {
+      translate([34,12,44]) rotate([180,-90,0]) #9g_servo();
+      translate([-34,12,44]) rotate([0,-90,0]) #9g_servo();
+      translate([0,-10,28]) #PiZeroBody();
+  }
 }
 
 module servo_mount() {
@@ -513,7 +539,7 @@ module servo_mount() {
     translate([0,-14,0]) rotate([0,90,0]) cylinder(h=8, d=3, center=true);
 }
 
-module body_case(width=44, height=42, length=105, wall=2) {
+module body_case(width=44, height=42, length=75, wall=1.5) {
     difference() {
         union() {
             translate([-length/2, -width/2, -height/2]) 
@@ -565,8 +591,9 @@ module assembled()
     
     // body
     if (dof == "4DOF") {
-       translate(body_l_offset) rotate(body_l_rotate) body_case(44,42,75,1.5);
-       translate(body_m_offset) rotate(body_m_rotate) body_case(44,42,75,1.5);
+       translate(body_offset) rotate(body_rotate) body_case_4dof(); 
+       //translate(body_l_offset) rotate(body_l_rotate) body_case(44,42,75,1.5);
+       //translate(body_m_offset) rotate(body_m_rotate) body_case(44,42,75,1.5);
        //translate(body_u_offset) rotate(body_u_rotate) body_case(44,42,75,3);
         
 //        translate([37,0,42]) rotate([0,0,-90]) body_4dof(height=18);
@@ -628,7 +655,9 @@ module units()
         } else if (unit == "head") {
             head();
         }
-    }    
+} 
+ 
+//battery();    
 //biped();
 //servo_case();
 //servo_case_m();
@@ -645,7 +674,7 @@ module units()
 //raspi_zero_cover();
 //ultrasound_clamp();
 //translate([50,0,0]) rotate([0,0,90]) battery_case(height=12);
-//body_case(44,42,75,1.5);
+//body_case();
     
 print();
 
