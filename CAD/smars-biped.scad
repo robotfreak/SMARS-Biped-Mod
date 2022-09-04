@@ -42,6 +42,9 @@ body_m_rotate = [0,0,0];
 body_l_offset = [0,0,0];
 body_l_rotate = [0,0,0];
 
+power_pack_offset = [0,0,0];
+power_pack_rotate = [0,0,0];
+
 /* [arms] */
 arm_l_offset = [0,0,0];
 arm_l_rotate = [0,0,0];
@@ -106,7 +109,7 @@ module servo_case_m()
     mirror([0,1,0]) servo_case();
 }
 
-module conn_diamant(width=4.8, height=11.5, length=8) 
+module conn_diamant(width=4.8, height=10.5, length=8) 
 {
     rotate([90,0,0]) 
     difference() { 
@@ -132,6 +135,19 @@ module servo_arm()
     import("servo-arm.stl");
 }
 */
+
+//servo_horn();
+
+module servo_horn()
+{
+        cylinder(d=7.5, h=6);
+        hull() {    
+            translate([0,0,0]) cylinder(d=7, h=2);
+            translate([0,16,0]) cylinder(d=5, h=2);
+        } 
+ 
+}
+
 module servo_arm2()
 {
     difference() {
@@ -140,11 +156,14 @@ module servo_arm2()
             translate([-22,-14,0]) rotate([0,90,0]) cylinder(d=12, h=44);
         }
         translate([-17.5,-26,-6]) roundedCube([35,36,12], r=4);
-        translate([17.5,-14,0]) rotate([0,90,0]) cylinder(d=7.5, h=6);
-        hull() {    
-            translate([20,0,0]) rotate([0,90,0]) cylinder(d=5, h=2);
-            translate([20,-14,0]) rotate([0,90,0]) cylinder(d=7, h=2);
-        } 
+        translate([20.5,-14,0]) rotate([0,90,0]) {
+            servo_horn();
+        }
+         translate([20.5,-14,0]) rotate([0,90,0])cylinder(d=7.5, h=6, center = true);
+        //hull() {    
+        //    translate([20,0,0]) rotate([0,90,0]) cylinder(d=5, h=2);
+        //    translate([20,-14,0]) rotate([0,90,0]) cylinder(d=7, h=2);
+        //} 
     }
     translate([-17.5,-14,0]) rotate([0,90,0]) cylinder(d=6, h=2);
 }
@@ -188,6 +207,24 @@ module ultrasound_clamp()
     translate([2,-23.25,-5]) rotate([0,0,-60]) cylinder(d=4,h=10,$fn=3);
     translate([14,10,0]) rotate([0,0,0]) dovetailPlate(female(), size= [10,10,3], plate=8, center=true);
     translate([14,-10,0]) rotate([0,0,0]) dovetailPlate(female(), size= [10,10,3], plate=8, center=true);
+
+}
+
+module ultrasound_clamp_long()
+{
+    difference() {
+        translate([-9.25,-27,-5]) roundedCube([18.5,54,10], r=1.5);
+        translate([-0.5,0,0]) cube([15.5,46.5,10], center=true);
+        translate([-8,0,0]) cube([3,44.5,10], center=true);
+    }
+    // snapin
+    translate([2,23.25,-5]) rotate([0,0,60]) cylinder(d=4,h=10,$fn=3);
+    translate([2,-23.25,-5]) rotate([0,0,-60]) cylinder(d=4,h=10,$fn=3);
+    // Body connector 
+    translate([24,0,0]) cube([30,30,10], center=true);
+    translate([34,10,-6.5]) rotate([0,180,0]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+    translate([34,0,-6.5]) rotate([0,180,0]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+    translate([34,-10,-6.5]) rotate([0,180,0]) dovetail(female(), size= [10,10,3], plate=8, center=true);
 
 }
 
@@ -236,6 +273,21 @@ module matrix_ultrasound()
         translate([21,-19,0]) matrix_16x8();
     }
 }
+
+module ultrasound_head_adapter() {
+  difference() {
+    cube([30,30,10], center=true); 
+    translate([14,0,0]) cube([2,10,12], center=true);
+  }
+    /* head connector */
+    translate([10,10,2.5]) rotate([0,0,180]) dovetailPlate(male(), size= [10,10,3], plate=8, center=true);
+    translate([10,-10,2.5]) rotate([0,0,180]) dovetailPlate(male(), size= [10,10,3], plate=8, center=true);
+    /* Body connector */
+    translate([-10,10,-6.5]) rotate([0,180,180]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+    translate([-10,0,-6.5]) rotate([0,180,180]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+    translate([-10,-10,-6.5]) rotate([0,180,180]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+ 
+}
   
 /*
 module leg()
@@ -274,15 +326,18 @@ module leg_o()
 */
 module leg_4dof() {
         translate([-9,0,14]) rotate([90,0,0]) 
-        difference() {
+        difference() 
+        {
             servo_arm2();
-            translate([3,14,0]) rotate([90,0,0]) cylinder(d=7.5, h=6);
-            translate([3,10,0]) rotate([0,0,90])hull() {    
-                translate([0,14,0]) rotate([0,90,0]) cylinder(d=5, h=2);
-                translate([0,0,0]) rotate([0,90,0]) cylinder(d=7, h=2);
-            }
+            translate([5,10,0]) rotate([0,90,90]) servo_horn();
+            translate([5,14,0]) rotate([90,0,0]) cylinder(d=7.5, h=6);
+            //translate([3,10,0]) rotate([0,0,90]) servo_horn();
+            //hull() {    
+            //    translate([0,14,0]) rotate([0,90,0]) cylinder(d=5, h=2);
+            //    translate([0,0,0]) rotate([0,90,0]) cylinder(d=7, h=2);
+            //}
         } 
-
+ 
 //    translate([-17,0,46]) rotate([0,-90,90]) servo_arm2();
     
 }
@@ -297,6 +352,27 @@ module leg_lower_6dof() {
     translate([0,-10,0]) servo_arm2();
     translate([20.5,4,0]) rotate([0,90,90]) conn_diamant(height=12, width=4.5);
     translate([-20.5,4,0]) rotate([0,90,90]) conn_diamant(height=12, width=4.5);
+}
+
+
+module arm_left_4dof() {
+    mirror([0,0,1]) arm_right_4dof();
+} 
+
+module arm_right_4dof() {
+    difference() {
+        hull() {
+            translate([20,0,0]) cylinder(d=12,h=4, center=true);
+            translate([-20,0,0]) cylinder(d=12,h=4, center=true);
+        }
+        #translate([18,0,0]) rotate([0,0,90]) servo_horn();
+        translate([18,0,0]) rotate([0,0,0])cylinder(d=7.5, h=6, center = true);
+
+    }
+    hull() {
+        translate([-20,0,0]) cylinder(d=12,h=4, center=true);
+        translate([-30,-30,0]) cylinder(d=12,h=4, center=true);
+    }
 }
 
 module body_4dof(width=45, height=12, length=105, wall=2)
@@ -459,18 +535,35 @@ module battery() {
 
 module ultrasonic_head() {
     matrix_ultrasound();
-    translate([-8,0,48]) rotate([180,0,0]) ultrasound_clamp();
+    translate([-8,0,48]) rotate([0,0,0]) ultrasound_clamp_long();
 }
 
 module stl_head() {
     difference() {
-        translate(stlhead_offset) rotate(stlhead_rotate) scale([stlhead_scale, stlhead_scale, stlhead_scale]) import(stlhead_file, convexity=3);
+        translate([0,0,0]) rotate([0,-20,0]) scale([stlhead_scale, stlhead_scale, stlhead_scale]) import(stlhead_file, convexity=3);
         translate([0,0,-3]) cube([40,40,6], center=true);
     }
     translate([-1,0,-0.5]) cylinder(d=22, h=4, $fn=50);
- translate([0,0,2]) rotate([180,0,0]) dovetailPlate(female(), size= [10,10,3], plate=8, center=true);
+    translate([-11,0,-2]) stl_head_adapter();
+ //translate([0,0,2]) rotate([180,0,0]) dovetailPlate(female(), size= [10,10,3], plate=8, center=true);
     //}
 
+}
+
+
+module stl_head_adapter() {
+    difference() {
+        union() {
+            cube([20,30,4],center=true);
+            translate([10,0,0]) cylinder(d=22, h=4, center=true, $fn=50);
+        }
+        translate([10,5,0]) cylinder(d=2, h=4, center=true, $fn=50);
+        translate([10,-5,0]) cylinder(d=2, h=4, center=true, $fn=50);
+    }
+    translate([-5,10,-3.5]) rotate([0,180,0]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+    translate([-5,0,-3.5]) rotate([0,180,0]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+    translate([-5,-10,-3.5]) rotate([0,180,0]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+    translate([15,0,-3.5]) cylinder(d=5, h=3,center=true);
 }
 
 module head() {
@@ -493,9 +586,9 @@ module left_leg_6dof() {
         translate([0,-30.5,0]) feet();
         translate([0,-25,0]) rotate([0,180,90]) servo_case();
         translate([0,-25,23]) rotate([90,0,0]) leg_lower_6dof();
-        translate([6,-25,35]) rotate([0,180,0]) servo_case();
-        translate([6,-25,58]) rotate([-90,0,90]) leg_upper_6dof();
-        translate([7.4,-25,86]) rotate([0,180,0]) servo_case();
+        translate([-5,-25,35]) rotate([0,180,180]) servo_case_m();
+        translate([-5,-25,58]) rotate([-90,0,-90]) leg_upper_6dof();
+//        translate([7.4,-25,86]) rotate([0,180,0]) servo_case();
 
 }
 
@@ -511,9 +604,9 @@ module right_leg_6dof() {
         translate([0,30.5,0]) feet();
         translate([0,25,0]) rotate([0,180,-90]) servo_case_m();
         translate([0,25,23]) rotate([90,0,0]) leg_lower_6dof();
-        translate([6,25,35]) rotate([0,180,0]) servo_case_m();
-        translate([6,25,58]) rotate([90,0,90]) leg_upper_6dof();
-        translate([7.4,25,86]) rotate([0,180,0]) servo_case_m();
+        translate([-5,25,35]) rotate([0,180,180]) servo_case();
+        translate([-5,25,58]) rotate([90,0,90]) leg_upper_6dof();
+//        translate([7.4,25,86]) rotate([0,180,0]) servo_case_m();
 
 }
 
@@ -539,6 +632,10 @@ module servo_mount() {
     translate([0,-14,0]) rotate([0,90,0]) cylinder(h=8, d=3, center=true);
 }
 
+module power_pack(width=60, height=12, length=92) {
+  translate([-length/2, -width/2, -height/2]) roundedCube([length,width,height], r=5);
+}
+
 module body_case(width=44, height=42, length=75, wall=1.5) {
     difference() {
         union() {
@@ -547,20 +644,20 @@ module body_case(width=44, height=42, length=75, wall=1.5) {
                 translate([0,0,0]) roundedCube([length,width, height], r=2);
                 translate([wall,wall,wall]) roundedCube([length-wall*2,width-wall*2,height], r=2);
             }   
-            translate([0,width/2+1.5,-(height/2-5)]) rotate([0,90,90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
-            translate([-10,width/2+1.5,-(height/2-5)]) rotate([0,90,90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
-            translate([10,width/2+1.5,-(height/2-5)]) rotate([0,90,90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
-            translate([0,-(width/2+1.5),-(height/2-5)]) rotate([0,90,-90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
-            translate([-10,-(width/2+1.5),-(height/2-5)]) rotate([0,90,-90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
-            translate([10,-(width/2+1.5),-(height/2-5)]) rotate([0,90,-90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+            translate([0,width/2+1.5,-(height/2-5)]) rotate([0,-90,-90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
+            translate([-10,width/2+1.5,-(height/2-5)]) rotate([0,-90,-90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
+            translate([10,width/2+1.5,-(height/2-5)]) rotate([0,-90,-90]) dovetail(male(), size= [10,10,3], plate=8, center=true);
+            translate([0,-(width/2+1.5),-(height/2-5)]) rotate([0,-90,90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+            translate([-10,-(width/2+1.5),-(height/2-5)]) rotate([0,-90,90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
+            translate([10,-(width/2+1.5),-(height/2-5)]) rotate([0,-90,90]) dovetail(female(), size= [10,10,3], plate=8, center=true);
         }
         // servo cutoffs
-        translate([length/2,-2,-(height/2-wall-7)]) servo_mount();  
-        translate([-length/2,-2,-(height/2-wall-7)]) servo_mount();  
-        translate([23,-width/2,-2]) rotate([90,0,90]) servo_mount();  
-        translate([-23,-width/2,-2]) rotate([90,0,90]) servo_mount();  
-        translate([23,width/2,-2]) rotate([90,0,90]) servo_mount();  
-        translate([-23,width/2,-2]) rotate([90,0,90]) servo_mount();  
+        translate([length/2,0,-(height/2-wall-7)]) servo_mount();  
+        translate([-length/2,0,-(height/2-wall-7)]) servo_mount();  
+        translate([23,-width/2,0]) rotate([90,0,90]) servo_mount();  
+        translate([-23,-width/2,0]) rotate([90,0,90]) servo_mount();  
+        translate([23,width/2,0]) rotate([90,0,90]) servo_mount();  
+        translate([-23,width/2,0]) rotate([90,0,90]) servo_mount();  
         // snapin cutoffs
         translate([length/2,-10,(height/2-4)]) cube([4,10,2.5], center=true);  
         translate([length/2,10,(height/2-4)]) cube([4,10,2.5], center=true);  
@@ -601,17 +698,22 @@ module assembled()
 //        translate([37,0,89]) rotate([0,0,90]) battery_case();
     }
     else if (dof == "6DOF") {
-        translate([2,0,100]) rotate([0,0,-90]) body_6dof();
-        translate([2,0,121]) rotate([0,0,90]) cpu_case();
-        translate([2,0,142]) rotate([0,0,90]) battery_case();
+       translate(body_offset) rotate(body_rotate) body_case_4dof(); 
     }
+   if (show_non_printable_parts == "true") {
+        translate(power_pack_offset) rotate(power_pack_rotate)power_pack();
+   }
+    
+    // arms
+        translate(arm_r_offset) rotate(arm_r_rotate) arm_right_4dof(); 
+        translate(arm_l_offset) rotate(arm_l_rotate) arm_left_4dof(); 
 
     // head
     if (dof == "4DOF") {
         translate(head_offset) head(); 
     }
     else if (dof == "6DOF") {
-        translate([0,0,160]) head(); 
+        translate(head_offset) head(); 
     }    
 }
 
@@ -672,9 +774,13 @@ module units()
 //leg_o();
 //cpu_case();
 //raspi_zero_cover();
-//ultrasound_clamp();
+//ultrasound_clamp_long();
+//stl_head();
+//stl_head_adapter();
 //translate([50,0,0]) rotate([0,0,90]) battery_case(height=12);
 //body_case();
+//ultrasound_head_adapter();
+//power_pack();
     
 print();
 
@@ -695,9 +801,9 @@ module print() {
             feet();
         } else if (part == "body") {
             if (dof == "4DOF") {
-                body_case_4dof();
+                body_case();
             } else if (dof == "6DOF") {
-                body_6dof();
+                body_case();
             }
         } else if (part == "servo") {
             servo_case();
