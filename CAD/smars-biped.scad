@@ -17,7 +17,7 @@ use <dovetail.scad>
 mode = "units"; // [assembled:Fully Assembled view, exploded:Explosion view,parts:Parts view, units:Units view]
 part = "head"; // [leg:Leg,feet:Feet,body:Body,servo:Servo Cover,servo_m:Servo M Cover,head:Head Cover,power:Power Cover,cpu:CPU cover]
 unit = "leg_l"; // [leg_l:Leg Left,leg_r:Leg Right,body:Body,head:Head] 
-dof = "6DOF"; // [4DOF:4 DoF, 6DOF:6 DoF]
+dof = "6DOF"; // [4DOF:4 DoF Biped, 6DOF:6 DoF Biped, 2WD:2 Wheel drive]
 show_non_printable_parts = "false"; // [true:yes,false:no]
 
 /* [head] */
@@ -535,7 +535,12 @@ module battery() {
 
 module ultrasonic_head() {
     matrix_ultrasound();
-    translate([-8,0,48]) rotate([0,0,0]) ultrasound_clamp_long();
+    if (dof != "2WD") {
+        translate([-8,0,48]) rotate([0,0,0]) ultrasound_clamp_long();
+    }
+    else {
+        translate([-8,0,48]) rotate([0,0,0]) ultrasound_clamp_vert();
+    }
 }
 
 module stl_head() {
@@ -613,8 +618,14 @@ module right_leg_6dof() {
 module body_case_4dof() {
   translate([0,0,0]) rotate([90,0,0]) body_case();
   if (show_non_printable_parts == "true") {
-     translate([23,2,-18]) rotate([180,0,-90]) #9g_servo();
-     translate([-23,2,-18]) rotate([180,0,-90]) #9g_servo();
+     if (dof == "2WD") {
+      translate([34,12,0]) rotate([0,90,0]) #9g_servo();
+      translate([-34,12,0]) rotate([180,90,0]) #9g_servo();
+     }
+     else {
+         translate([23,2,-18]) rotate([180,0,-90]) #9g_servo();
+         translate([-23,2,-18]) rotate([180,0,-90]) #9g_servo();
+     }
      translate([0,-8,5]) rotate([-90,0,0]) #battery(); 
   }
 
@@ -687,34 +698,20 @@ module assembled()
     }
     
     // body
-    if (dof == "4DOF") {
-       translate(body_offset) rotate(body_rotate) body_case_4dof(); 
-       //translate(body_l_offset) rotate(body_l_rotate) body_case(44,42,75,1.5);
-       //translate(body_m_offset) rotate(body_m_rotate) body_case(44,42,75,1.5);
-       //translate(body_u_offset) rotate(body_u_rotate) body_case(44,42,75,3);
-        
-//        translate([37,0,42]) rotate([0,0,-90]) body_4dof(height=18);
-//        translate([37,0,68]) rotate([0,0,90]) cpu_case();
-//        translate([37,0,89]) rotate([0,0,90]) battery_case();
-    }
-    else if (dof == "6DOF") {
-       translate(body_offset) rotate(body_rotate) body_case_4dof(); 
-    }
+    translate(body_offset) rotate(body_rotate) body_case_4dof(); 
+     
    if (show_non_printable_parts == "true") {
         translate(power_pack_offset) rotate(power_pack_rotate)power_pack();
    }
     
     // arms
+    if (dof != "2WD") {
         translate(arm_r_offset) rotate(arm_r_rotate) arm_right_4dof(); 
-        translate(arm_l_offset) rotate(arm_l_rotate) arm_left_4dof(); 
+        translate(arm_l_offset) rotate(arm_l_rotate) arm_left_4dof();
+    } 
 
     // head
-    if (dof == "4DOF") {
-        translate(head_offset) head(); 
-    }
-    else if (dof == "6DOF") {
-        translate(head_offset) head(); 
-    }    
+    translate(head_offset) head(); 
 }
 
 module exploded() 
