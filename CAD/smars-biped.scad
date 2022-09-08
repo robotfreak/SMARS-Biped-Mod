@@ -14,14 +14,15 @@ use <PiZero.scad>
 use <dovetail.scad>
 
 /* [global] */
-mode = "units"; // [assembled:Fully Assembled view, exploded:Explosion view,parts:Parts view, units:Units view]
+mode = "assembled"; // [assembled:Fully Assembled view, exploded:Explosion view,parts:Parts view, units:Units view]
 part = "head"; // [leg:Leg,feet:Feet,body:Body,servo:Servo Cover,servo_m:Servo M Cover,head:Head Cover,power:Power Cover,cpu:CPU cover]
 unit = "leg_l"; // [leg_l:Leg Left,leg_r:Leg Right,body:Body,head:Head] 
 dof = "6DOF"; // [4DOF:4 DoF Biped, 6DOF:6 DoF Biped, 2WD:2 Wheel drive]
-show_non_printable_parts = "false"; // [true:yes,false:no]
+show_non_printable_parts = "true"; // [true:yes,false:no]
 
 /* [head] */
 headtype = "ultrasonic"; // [ultrasonic:Ultrasonic, stl: STL File]
+headmount = "vertical"; // [vertical:Vertical, horizontal:Horizontal]
 head_offset = [0,0,0];
 head_rotate = [0,0,0];
 
@@ -33,6 +34,7 @@ stlhead_offset = [0,0,0];
 stlhead_rotate = [0,0,0];
 
 /* [body] */
+bodytype = "dual"; //  [dual:Dual, triple:Triple]
 body_offset = [0,0,60];
 body_rotate = [0,0,90];
 body_u_offset = [0,0,0];
@@ -46,12 +48,16 @@ power_pack_offset = [0,0,0];
 power_pack_rotate = [0,0,0];
 
 /* [arms] */
-arm_l_offset = [0,0,0];
+armtype = "simple"; // [simple:Simple]
+armpairs = 0; // [0,1,2]
+arm_l_offset =[0,0,0];
 arm_l_rotate = [0,0,0];
 arm_r_offset = [0,0,0];
 arm_r_rotate = [0,0,0];
 
 /* [legs] */
+legtype = "2dof"; // [2dof:2DoF, 3dof:3DoF, 2wd:2WD, 4wd:4WD]
+legpairs = 1; // [1,2,3]
 leg_l_offset = [0,0,0];
 leg_l_rotate = [0,0,0];
 leg_r_offset = [0,0,0];
@@ -129,14 +135,6 @@ module feet(height=3)
         translate([30,43.6,height]) conn_diamant();
     }
 }
-/*
-module servo_arm()
-{
-    import("servo-arm.stl");
-}
-*/
-
-//servo_horn();
 
 module servo_horn()
 {
@@ -289,41 +287,6 @@ module ultrasound_head_adapter() {
  
 }
   
-/*
-module leg()
-{
-    translate([-7.4,6,24.3]) {
-        difference() {
-            rotate([90,0,0]) servo_arm();
-            translate([-24,-12,4.5]) cube([50,12,15]);
-            translate([-9,-12,-2]) cube([15,14,12]);
-        }
-
-        difference() {
-            translate([-17,0,21.8]) rotate([0,-90,90]) servo_arm();
-            translate([-37,-12,-1]) cube([15,14,50]);
-        }
-    }
-}
-
-module leg_o()
-{
-    translate([-7.4,6,24.3]) {
-        difference() {
-            rotate([90,0,0]) servo_arm();
-            translate([-24,-12,4.5]) cube([50,12,15]);
-        }
-
-        translate([0,-11.8,4.4]) {
-            difference() {
-                rotate([-90,0,0]) servo_arm();
-                translate([-24,0,-19]) cube([50,12,15]);
-            }
-        }
-
-    }
-}
-*/
 module leg_4dof() {
         translate([-9,0,14]) rotate([90,0,0]) 
         difference() 
@@ -375,154 +338,6 @@ module arm_right_4dof() {
     }
 }
 
-module body_4dof(width=45, height=12, length=105, wall=2)
-{
-    translate([-length/2,-width/2,-height/2]) {
-        difference() {
-            translate([0,0,4]) roundedCube([length,width,height], r=2);
-            translate([wall,wall,4]) roundedCube([length-wall*2,width-wall*2,height], r=1.5);
-        }
-        translate([29.4,wall,4]) cube([wall, width-wall*2, height]);
-        translate([72.6,wall,4]) cube([wall, width-wall*2, height]);
-
-        translate([4,0,10]) rotate([0,-90,90]) conn_diamant();
-        translate([45.2,0,10]) rotate([0,-90,90]) conn_diamant();
-        translate([59.8,0,10]) rotate([0,-90,90]) conn_diamant();
-        translate([101,0,10]) rotate([0,-90,90]) conn_diamant();
-    }
-}
-/*
-module body_6dof(width=45, height=18, length=105, wall=2)
-{
-    translate([-length/2,-width/2,-height/2]) {
-        difference() {
-            translate([0,0,0]) roundedCube([length,width,height], r=2);
-            translate([wall,wall,0]) roundedCube([length-wall*2,width-wall*2,height], r=1.5);
-        }
-        translate([26,2.5,0]) rotate([180,0,0]) conn_diamant(width=3);
-        translate([26,2.5,height/2]) cube([11.5,3,height], center=true);
-        translate([78,2.5,0]) rotate([180,0,0]) conn_diamant(width=3);
-        translate([78,2.5,height/2]) cube([11.5,3,height], center=true);
-        translate([26,42.5,0]) rotate([180,0,0]) conn_diamant(width=3);
-        translate([26,42.5,height/2]) cube([11.5,3,height], center=true);
-        translate([78,42.5,0]) rotate([180,0,0]) conn_diamant(width=3);
-        translate([78,42.5,height/2]) cube([11.5,3,height], center=true);
-        translate([length-wall-1,width/2-12, 8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);
-        translate([length-wall-1,width/2+12, 8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);
-        translate([wall,width/2-12, 8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);
-        translate([wall,width/2+12, 8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);
-        difference() {
-            union() {
-                translate([length/2+28,width/2,height-1]) cube([8,width,2], center=true);
-                translate([length/2+28,width/2+9.5,height-4]) cylinder(d=5,h=2);
-                translate([length/2+28,width/2-9.5,height-4]) cylinder(d=5,h=2);
-            }
-            translate([length/2+28,width/2+9.5,height-5]) cylinder(d=3,h=8);
-            translate([length/2+28,width/2-9.5,height-5]) cylinder(d=3,h=8);
-        }
-        difference() {
-            union() {
-                translate([length/2-28,width/2,height-1]) cube([8,width,2], center=true);
-                translate([length/2-28,width/2+9.5,height-4]) cylinder(d=5,h=2);
-                translate([length/2-28,width/2-9.5,height-4]) cylinder(d=5,h=2);
-            }
-            translate([length/2-28,width/2+9.5,height-5]) cylinder(d=3,h=8);
-            translate([length/2-28,width/2-9.5,height-5]) cylinder(d=3,h=8);
-        }
-    }
-}
-
-module battery_case(width=45, height=22, length=105, wall=2)
-{
-    translate([-length/2,-width/2,-height/2]) {
-        difference() {
-            translate([0,0,wall]) roundedCube([length,width,height], r=2);
-            translate([wall,wall,0]) roundedCube([length-wall*2,width-wall*2,height], r=2);
-            translate([length/2+27.25+5,width/2,height]) cylinder(d=3, h=8);
-            translate([length/2-27.25+5,width/2,height]) cylinder(d=3, h=8);
-            translate([-2, 12, height/2]) rotate([0,90,0]) cylinder(d=12, h=8);
-            translate([-2, 34, height/2]) rotate([0,90,0]) cylinder(d=7, h=8);
-            translate([-2, 40.5, height/2]) rotate([0,90,0]) cylinder(d=2, h=6);
-        }
-            //translate([lentgh, width/2, height/2]) rotate([0,90,0]) cylinder(d=12, h=8);
-        translate([wall+1.5,width/2,0]) cube([3,11.5,6], center=true);
-        translate([wall+1.5,width/2,0]) rotate([180,0,90]) conn_diamant(width=3);
-        difference() {
-            translate([wall+1.5,width/2,height/2]) cube([3,11.5,height], center=true);
-            translate([-2, 12, height/2]) rotate([0,90,0]) cylinder(d=16.4, h=8, $fn=6);
-        }
-        difference() {
-            translate([length/2+27.25+5,width/2,height-wall]) cylinder(d=5, h=2);
-            translate([length/2+27.25+5,width/2,height-wall]) cylinder(d=3, h=8);
-        }
-        difference() {
-            translate([length/2-27.25+5,width/2,height-wall]) cylinder(d=5, h=2);
-            translate([length/2-27.25+5,width/2,height-wall]) cylinder(d=3, h=8);
-        }
-        translate([length/2+10+5,width/4,height-wall]) cylinder(d=5, h=2);
-        translate([length/2-10+5,width*3/4,height-wall]) cylinder(d=5, h=2);
-        translate([length-wall-1.5,width/2,0]) rotate([180,0,90]) conn_diamant(width=3);
-        translate([length-wall-1.5,width/2,height/2]) cube([3,11.5,height], center=true);
-        translate([length/2+10,width+wall/2+0.5,height/2+8]) rotate([90,90,180]) dovetail(male(), size= [10,10,3], plate=8, center=true);
-        translate([length/2-10,width+wall/2+0.5,height/2+8]) rotate([90,90,180]) dovetail(male(), size= [10,10,3], plate=8, center=true);
-
-    }
-    if (show_non_printable_parts == "true") {
-    // battery pack 
-        difference() {
-            #cube([77,39,15], center=true);
-            #translate([0,0,1]) cube([75,37,14], center=true);
-        }
-        #translate([-34,10,1]) rotate([0,90,0]) cylinder(d=18.6, h=68);
-        #translate([-34,-10,1]) rotate([0,90,0]) cylinder(d=18.6, h=68);
-    }
-}
-
-module cpu_case(width=45, height=22, length=105, wall=2)
-{
-    translate([-length/2,-width/2,-height/2]) {
-        difference() {
-            translate([0,0,0]) roundedCube([length,width,height], r=2);
-            translate([wall,wall,0]) roundedCube([length-wall*2,width-wall*2,height], r=2);
-            translate([length/2+32.5-12.4,0,height-7]) cube([14,4,6], center=true); //hdmi
-            translate([length/2+32.5-41.4,0,height-7]) cube([10,4,4], center=true); //usb
-            translate([length/2+32.5-54,0,height-7]) cube([10,4,4], center=true);   //usb
-        }
-        translate([wall+1.5,width/2+12,0]) rotate([180,0,90]) conn_diamant(width=3);
-        translate([wall+1.5,width/2+12,height/2]) cube([3,11.5,height], center=true);
-        translate([wall+1.5,width/2-12,0]) rotate([180,0,90]) conn_diamant(width=3);
-        translate([wall+1.5,width/2-12,height/2]) cube([3,11.5,height], center=true);
-        translate([wall,width/2, height-8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);
-        translate([length-wall-1.5,width/2-12,0]) rotate([180,0,90]) conn_diamant(width=3);
-        translate([length-wall-1.5,width/2-12,height/2]) cube([3,11.5,height], center=true);
-        translate([length-wall-1.5,width/2+12,0]) rotate([180,0,90]) conn_diamant(width=3);
-        translate([length-wall-1.5,width/2+12,height/2]) cube([3,11.5,height], center=true);
-        translate([length-wall-1,width/2, height-8]) rotate([0,90,0]) cylinder(d=6.5, h=1, $fn=4);
-        difference() {
-            union() {
-                translate([length/2+29,width/2,height-1]) cube([8,width,2], center=true);
-                translate([length/2+29,width/2-5+11.5,height-4]) cylinder(d=5,h=2);
-                translate([length/2+29,width/2-5-11.5,height-4]) cylinder(d=5,h=2);
-            }
-            translate([length/2+29,width/2-5+11.5,height-5]) cylinder(d=3,h=8);
-            translate([length/2+29,width/2-5-11.5,height-5]) cylinder(d=3,h=8);
-        }
-        difference() {
-            union() {
-                translate([length/2-29,width/2,height-1]) cube([8,width,2], center=true);
-                translate([length/2-29,width/2-5+11.5,height-4]) cylinder(d=5,h=2);
-                translate([length/2-29,width/2-5-11.5,height-4]) cylinder(d=5,h=2);
-            }
-            translate([length/2-29,width/2-5+11.5,height-5]) cylinder(d=3,h=8);
-            translate([length/2-29,width/2-5-11.5,height-5]) cylinder(d=3,h=8);
-        }
-        if (show_non_printable_parts == "true") {
-            #translate([length/2,width/2,height/2]) raspi_zero_cover();
-        }
-    }
-}
-*/
-
 module battery() {
     hull() {
         cylinder(h=50,d=14, center=true);
@@ -535,10 +350,10 @@ module battery() {
 
 module ultrasonic_head() {
     matrix_ultrasound();
-    if (dof != "2WD") {
+    if (headmount == "horizontal") {
         translate([-8,0,48]) rotate([0,0,0]) ultrasound_clamp_long();
     }
-    else {
+    else if (headmount == "vertical") {
         translate([-8,0,48]) rotate([0,0,0]) ultrasound_clamp_vert();
     }
 }
@@ -580,6 +395,7 @@ module head() {
     }
 }
 
+//!left_leg_4dof();
 module left_leg_4dof() {
         translate([0,-28,0]) feet();
         translate([0,-22.5,0]) rotate([0,180,90]) servo_case();
@@ -587,6 +403,7 @@ module left_leg_4dof() {
         //translate([7.4,-22.5,46]) rotate([-90,0,-90]) servo_case();
 }
 
+//!left_leg_6dof();
 module left_leg_6dof() {
         translate([0,-30.5,0]) feet();
         translate([0,-25,0]) rotate([0,180,90]) servo_case();
@@ -615,7 +432,7 @@ module right_leg_6dof() {
 
 }
 
-module body_case_4dof() {
+module body_case_dual() {
   translate([0,0,0]) rotate([90,0,0]) body_case();
   if (show_non_printable_parts == "true") {
      if (dof == "2WD") {
@@ -634,6 +451,34 @@ module body_case_4dof() {
       translate([34,12,44]) rotate([180,-90,0]) #9g_servo();
       translate([-34,12,44]) rotate([0,-90,0]) #9g_servo();
       translate([0,-10,28]) #PiZeroBody();
+  }
+}
+
+module body_case_triple() {
+  translate([0,0,0]) rotate([90,0,0]) body_case();
+  if (show_non_printable_parts == "true") {
+     if (dof == "2WD") {
+      translate([34,12,0]) rotate([0,90,0]) #9g_servo();
+      translate([-34,12,0]) rotate([180,90,0]) #9g_servo();
+     }
+     else {
+         translate([23,2,-18]) rotate([180,0,-90]) #9g_servo();
+         translate([-23,2,-18]) rotate([180,0,-90]) #9g_servo();
+     }
+     translate([0,-8,5]) rotate([-90,0,0]) #battery(); 
+  }
+
+  translate([0,0,46]) rotate([90,0,0]) body_case();
+  if (show_non_printable_parts == "true") {
+      translate([34,12,44]) rotate([180,-90,0]) #9g_servo();
+      translate([-34,12,44]) rotate([0,-90,0]) #9g_servo();
+      translate([0,-10,28]) #PiZeroBody();
+  }
+
+  translate([0,0,92]) rotate([90,0,0]) body_case();
+  if (show_non_printable_parts == "true") {
+      translate([34,12,88]) rotate([180,-90,0]) #9g_servo();
+      translate([-34,12,88]) rotate([0,-90,0]) #9g_servo();
   }
 }
 
@@ -681,26 +526,33 @@ module body_case(width=44, height=42, length=75, wall=1.5) {
 
 module assembled() 
 {
+  for(i = [0:1:legpairs-1]) {  
     // right leg
-    if (dof == "4DOF") {
-        right_leg_4dof();
+    if (legtype == "2dof") {
+        translate([i*50,0,0]) right_leg_4dof();
     }
-    else if (dof == "6DOF") {
-        right_leg_6dof();
+    else if (legtype == "3dof") {
+        translate([i*50,0,0]) right_leg_6dof();
     }
     
     // left leg
-    if (dof == "4DOF") {
-        left_leg_4dof();
+    if (legtype == "2dof") {
+        translate([i*50,0,0]) left_leg_4dof();
     }
-    else if (dof == "6DOF") {
-        left_leg_6dof();
+    else if (legtype == "3dof") {
+        translate([i*50,0,0]) left_leg_6dof();
     }
+  }
     
     // body
-    translate(body_offset) rotate(body_rotate) body_case_4dof(); 
-     
-   if (show_non_printable_parts == "true") {
+    if (bodytype == "dual") {
+        translate(body_offset) rotate(body_rotate) body_case_dual(); 
+    }
+    else if (bodytype == "triple") {
+        translate(body_offset) rotate(body_rotate) body_case_triple();
+    }    
+    
+    if (show_non_printable_parts == "true") {
         translate(power_pack_offset) rotate(power_pack_rotate)power_pack();
    }
     
@@ -733,29 +585,56 @@ module exploded()
 
 module units() 
 {
-        if (unit == "leg_l") {
-            if (dof == "4DOF") {
-                left_leg_4dof();
-            } else if (dof == "6DOF") {
-                left_leg_6dof();
-            }
-        } else if (unit == "leg_r") {
-            if (dof == "4DOF") {
-                right_leg_4dof();
-            } else if (dof == "6DOF") {
-                right_leg_6dof();
-            }
-        } else if (unit == "body") {
-            if (dof == "4DOF") {
-                body_case_4dof();
-            } else if (dof == "6DOF") {
-                body_6dof();
-            }
-        } else if (unit == "head") {
-            head();
+    if (unit == "leg_l") {
+        if (legtype == "2dof") {
+            left_leg_4dof();
+        } else if (legtype == "3dof") {
+            left_leg_6dof();
         }
+    } else if (unit == "leg_r") {
+        if (legtype == "2dof") {
+            right_leg_4dof();
+        } else if (legtype == "3dof") {
+            right_leg_6dof();
+        }
+    } else if (unit == "body") {
+        if (bodytype == "dual") {
+            body_case_dual();
+        }
+        else if (bodytype == "triple") {
+            body_case_triple();
+        }
+
+    } else if (unit == "head") {
+        head();
+    }
 } 
- 
+
+module parts() {
+    if (part == "leg") {
+        if (legtype == "2dof") {
+           leg_4dof();
+        } else if (legtype == "3dof") {
+           leg_upper_6dof();
+           translate([50,0,0]) leg_lower_6dof();
+        }
+    } else if (part == "feet") {
+        feet();
+    } else if (part == "body") {
+        body_case();
+    } else if (part == "servo") {
+        servo_case();
+    } else if (part == "servo_m") {
+        servo_case_m();
+    } else if (part == "head") {
+        head();
+    } else if (part == "power") {
+        battery_case();
+    } else if (part == "cpu") {
+        cpu_case();
+    }
+} 
+
 //battery();    
 //biped();
 //servo_case();
@@ -787,37 +666,12 @@ module print() {
         units();
     }
     if (mode == "parts") {
-        if (part == "leg") {
-            if (dof == "4DOF") {
-                leg_4dof();
-            } else if (dof == "6DOF") {
-                leg_upper_6dof();
-                translate([50,0,0]) leg_lower_6dof();
-            }
-        } else if (part == "feet") {
-            feet();
-        } else if (part == "body") {
-            if (dof == "4DOF") {
-                body_case();
-            } else if (dof == "6DOF") {
-                body_case();
-            }
-        } else if (part == "servo") {
-            servo_case();
-        } else if (part == "servo_m") {
-            servo_case_m();
-        } else if (part == "head") {
-            head();
-        } else if (part == "power") {
-            battery_case();
-        } else if (part == "cpu") {
-            cpu_case();
-        }
+        parts();
     }
     else if (mode == "assembled") {
-		    assembled();
-        }
+		assembled();
+    }
     else if (mode == "exploded") {
-            exploded();
-        }
+        exploded();
+    }
 } 
