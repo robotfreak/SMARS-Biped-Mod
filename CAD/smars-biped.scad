@@ -48,7 +48,7 @@ power_pack_offset = [0,0,0];
 power_pack_rotate = [0,0,0];
 
 /* [arms] */
-armtype = "simple"; // [simple:Simple]
+armtype = "simple"; // [simple:Simple, scorpio:Scorpio]
 armpairs = 0; // [0,1,2]
 arm_l_offset =[0,0,0];
 arm_l_rotate = [0,0,0];
@@ -56,7 +56,7 @@ arm_r_offset = [0,0,0];
 arm_r_rotate = [0,0,0];
 
 /* [legs] */
-legtype = "2dof"; // [2dof:2DoF, 3dof:3DoF, 2wd:2WD, 4wd:4WD]
+legtype = "2dof"; // [2dof:2DoF, 3dof:3DoF, wheeled:Wheeled, insect:Insect]
 legpairs = 1; // [1,2,3]
 leg_l_offset = [0,0,0];
 leg_l_rotate = [0,0,0];
@@ -338,6 +338,40 @@ module arm_right_4dof() {
     }
 }
 
+
+module scorpio_arm_left() {
+ mirror([0,0,0]) scorpio_arm_right();
+}
+
+module scorpio_arm_right() {
+ translate([-70,-38,-14]) rotate([90,0,0]) {
+ translate([0,-4,20]) import("right_claw.STL");
+ import("new_claw_right4.STL");
+ translate([5.5,8.5,-41]) import("new_claw1_right.STL");
+ }
+}
+
+//arm_right_4dof();
+//scorpio_arm_right();
+
+module arm_right() {
+ if (armtype == "simple") {
+    arm_right_4dof();
+ }
+ else if (armtype == "scorpio") {
+   scorpio_arm_right();
+ }
+}
+
+module arm_left() {
+ if (armtype == "simple") {
+    arm_left_4dof();
+ }
+ else if (armtype == "scorpio") {
+   scorpio_arm_left();
+ }
+}
+
 module battery() {
     hull() {
         cylinder(h=50,d=14, center=true);
@@ -414,6 +448,8 @@ module left_leg_6dof() {
 
 }
 
+//!right_leg_4dof();
+
 module right_leg_4dof() {
         translate([0,28,0]) feet();
         translate([0,22.5,0]) rotate([0,180,-90]) servo_case_m();
@@ -422,6 +458,8 @@ module right_leg_4dof() {
 
 }
 
+//right_leg_6dof();
+
 module right_leg_6dof() {
         translate([0,30.5,0]) feet();
         translate([0,25,0]) rotate([0,180,-90]) servo_case_m();
@@ -429,6 +467,34 @@ module right_leg_6dof() {
         translate([-5,25,35]) rotate([0,180,180]) servo_case();
         translate([-5,25,58]) rotate([90,0,90]) leg_upper_6dof();
 //        translate([7.4,25,86]) rotate([0,180,0]) servo_case_m();
+
+}
+
+
+module left_leg_wheeled() {
+    mirror([0,1,0]) right_leg_wheeled(); 
+}
+
+//right_leg_wheeled();
+
+module right_leg_wheeled() {
+  translate([-6,40,20]) roundedCube([12,12,80], r=3);
+  translate([0,42,20]) cube([10,20,10], true);
+  translate([0,58,20]) rotate([90,0,0]) cylinder(d=40,h=5);
+}
+
+//left_leg_insect();
+
+module left_leg_insect() {
+mirror([0,1,0]) right_leg_insect();
+}
+
+//right_leg_insect();
+
+module right_leg_insect() {
+ translate([1,90,35]) rotate([0,180,0]) import("foot.stl");
+        translate([0,70,30]) rotate([90,-90,0]) servo_case_m();
+        translate([-2,55,36]) rotate([0,90,0]) leg_lower_6dof();
 
 }
 
@@ -534,6 +600,12 @@ module assembled()
     else if (legtype == "3dof") {
         translate([i*50,0,0]) right_leg_6dof();
     }
+    else if (legtype == "wheeled") {
+        translate([i*50,0,0]) right_leg_wheeled();
+    }
+    else if (legtype == "insect") {
+        translate([i*50,0,0]) right_leg_insect();
+    }
     
     // left leg
     if (legtype == "2dof") {
@@ -541,6 +613,12 @@ module assembled()
     }
     else if (legtype == "3dof") {
         translate([i*50,0,0]) left_leg_6dof();
+    }
+    else if (legtype == "wheeled") {
+        translate([i*50,0,0]) left_leg_wheeled();
+    }
+    else if (legtype == "insect") {
+        translate([i*50,0,0]) left_leg_insect();
     }
   }
     
@@ -553,13 +631,13 @@ module assembled()
     }    
     
     if (show_non_printable_parts == "true") {
-        translate(power_pack_offset) rotate(power_pack_rotate)power_pack();
+        #translate(power_pack_offset) rotate(power_pack_rotate)power_pack();
    }
     
     // arms
-    if (dof != "2WD") {
-        translate(arm_r_offset) rotate(arm_r_rotate) arm_right_4dof(); 
-        translate(arm_l_offset) rotate(arm_l_rotate) arm_left_4dof();
+    if (armpairs > 0) {
+        translate(arm_r_offset) rotate(arm_r_rotate) arm_right(); 
+        translate(arm_l_offset) rotate(arm_l_rotate) arm_left();
     } 
 
     // head
